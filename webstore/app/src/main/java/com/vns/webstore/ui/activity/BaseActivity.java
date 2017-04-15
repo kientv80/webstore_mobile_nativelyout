@@ -44,7 +44,7 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String UPDATE = "update";
     static Map<String,List<WebPage>> webpaes = new HashMap<>();
     private static void initWebpages(){
-        /*kien
+        /*
         List<WebPage> news = new ArrayList<>();
         JsonArray categories = new JsonParser().parse(AppConfigService.getConfig("categories")).getAsJsonArray();
         for (int i = 0; i< categories.size();i++){
