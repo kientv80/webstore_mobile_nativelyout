@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">Báo Việt</string>
+    <string name="nav_news">Tin Tức</string>
+    <string name="nav_entertain">Giải Trí</string>
+    <string name="nav_games">Games</string>
+    <string name="nav_findaround">Tìm Quanh Đây</string>
+    <string name="nav_webapps">Ứng Dụng Web</string>
+    <string name="nav_util">Tiện Ích</string>
+
+    <string name="nav_entertainment">Người Nổi Tiếng</string>
+    <string name="nav_music">Nghe Nhạc</string>
+    <string name="nav_film">Xem Phim</string>
+    <string name="nav_music_film">Nghe Nhạc - Xem Phim</string>
+    <string name="nav_food_health">Sức Khỏe - Bài Thuốc</string>
+    <string name="nav_knowledge">Kiến Thức</string>
+    <string name="title_notify">Thông Báo Mới</string>
+    <string name="nav_food_cooking">Nấu Ăn</string>
+    <string name="nav_sport">Thể Thao</string>
+    <string name="nav_economy">Kinh Tế</string>
+    <string name="nav_tech">Công Nghệ</string>
+    <string name="nav_love">Tình Yêu - Gia Đình</string>
+    <string name="nav_car">Ô tô - Xe máy</string>
+    <string name="nav_house">Quy Hoạch - Nhà Đất</string>
+    <string name="nav_job">Việc Làm</string>
+    <string name="nav_webstore">Webstore</string>
+    <string name="navigation_drawer_open">Mở</string>
+    <string name="navigation_drawer_close">Đóng</string>
+    <string name="cate">Chuyên Mục</string>
+    <string name="msg.web.loading">Đang tải bài viết ... </string>
+    <string name="title_activity_web_view">WebViewActivity</string>
+    <string name="nav_shopping">Mua sắm</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="title_activity_open_article">OpenArticleActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="nav_setting">Cấu Hình</string>
+    <string name="nav_notification">Thông Báo Mới</string>
+
+</resources>

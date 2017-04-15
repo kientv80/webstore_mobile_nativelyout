@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_news"
+            android:icon="@drawable/ic_update_white_24dp"
+            android:title="@string/nav_news"/>
+        <item
+            android:id="@+id/nav_economic"
+            android:icon="@drawable/ic_business_white_24dp"
+            android:title="@string/nav_economy" />
+        <item
+            android:id="@+id/nav_technology"
+            android:icon="@drawable/ic_important_devices_white_24dp"
+            android:title="@string/nav_tech" />
+        <item
+            android:id="@+id/nav_sports"
+            android:icon="@drawable/ic_pool_white_24dp"
+            android:title="@string/nav_sport" />
+        <item
+            android:id="@+id/nav_house"
+            android:icon="@drawable/ic_business_white_24dp"
+            android:title="@string/nav_house" />
+        <item
+            android:id="@+id/nav_xe"
+            android:icon="@drawable/ic_motorcycle_white_24dp"
+            android:title="@string/nav_car" />
+        <item
+            android:id="@+id/nav_entertainments"
+            android:icon="@drawable/ic_people_white_24dp"
+            android:title="@string/nav_entertainment" />
+        <item
+            android:id="@+id/nav_foodandhealth2"
+            android:icon="@drawable/ic_restaurant_menu_white_24dp"
+            android:title="@string/nav_food_health" />
+        <item
+            android:id="@+id/nav_love"
+            android:icon="@drawable/ic_favorite_border_white_24dp"
+            android:title="@string/nav_love" />
+
+        <item
+            android:id="@+id/nav_music"
+            android:icon="@drawable/ic_library_music_white_24dp"
+            android:title="@string/nav_music" />
+        <item
+            android:id="@+id/nav_film"
+            android:icon="@drawable/ic_local_movies_white_24dp"
+            android:title="@string/nav_film" />
+    </group>
+
+</menu>

@@ -1,0 +1,193 @@
+package com.vns.webstore.ui.activity;
+
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v7.app.AppCompatActivity;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import com.vns.webstore.middleware.entity.Article;
+import com.vns.webstore.middleware.entity.NotifyInfo;
+import com.vns.webstore.middleware.entity.WebPage;
+import com.vns.webstore.middleware.service.TemplateService;
+import com.vns.webstore.middleware.utils.JSONHelper;
+import com.vns.webstore.openapi.CoreOpenAPIs;
+import com.vns.webstore.openapi.View;
+import com.vns.webstore.middleware.storage.LocalStorageHelper;
+
+import java.util.Formatter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by LAP10572-local on 8/29/2016.
+ */
+public class BaseActivity  extends AppCompatActivity {
+    public static final String FINDAROUND = "findaround";
+    public static final String KNOWLEDGE = "knowledge";
+    public static final String MUSIC_FILM = "music_film";
+    public static final String ENTERTAINMENTS = "entertainment";
+    public static final String NEWS = "news";
+    public static final String UTIL = "util";
+    public static final String WEBSTORE = "webstore";
+    public static final String UPDATE = "update";
+    static Map<String,List<WebPage>> webpaes = new HashMap<>();
+    private static void initWebpages(){
+        /*
+        List<WebPage> news = new ArrayList<>();
+        JsonArray categories = new JsonParser().parse(AppConfigService.getConfig("categories")).getAsJsonArray();
+        for (int i = 0; i< categories.size();i++){
+            JsonElement jsonCates = categories.get(i);
+            JsonElement item = jsonCates.getAsJsonObject().get("items");
+            List<WebPage> pageItems = new ArrayList<>();
+            if(item != null) {
+                try{
+                    JsonArray items = item.getAsJsonArray();
+                    for (int j = 0; j < items.size();j++){
+                        JsonObject itemJson = items.get(j).getAsJsonObject();
+                        pageItems.add(new WebPage(itemJson.get("label").getAsString(),itemJson.get("url").getAsString()));
+                    }
+                    webpaes.put(jsonCates.getAsJsonObject().get("name").getAsString(),pageItems);
+                }catch (Exception ex){
+                    ex.printStackTrace();
+                }
+
+            }else{
+                pageItems.add(new WebPage(jsonCates.getAsJsonObject().get("label").getAsString(),jsonCates.getAsJsonObject().get("url").getAsString()));
+                webpaes.put(jsonCates.getAsJsonObject().get("name").getAsString(),pageItems);
+            }
+        }
+*/
+    }
+
+    static String buildFeed() {
+        String notify = LocalStorageHelper.getFromFile(UPDATE);
+        if(notify != null && !notify.isEmpty()) {
+            List<NotifyInfo> notifyInfo = JSONHelper.toObjects(notify, NotifyInfo.class);
+            String template = TemplateService.getNotifyTemplate();
+            StringBuilder html = new StringBuilder();
+            html.append("<link rel=\"stylesheet\" href=\"file:///android_asset/style.css\">");
+            html.append("<html><body class='body'> <div class='notifybody'>");
+            for (NotifyInfo n : notifyInfo) {
+                Formatter f = new Formatter();
+                html.append(f.format(template, n.getFrom(), n.getDate(), n.getUrl(), n.getThemeUrl(), n.getUrl(), n.getTitle(), n.getMessage()));
+            }
+            html.append("</div></body></html>");
+            return html.toString();
+        }
+        return "No new upate";
+    }
+    private static Article toArticle(NotifyInfo notifyInfo){
+        Article art = new Article();
+        art.setUrl(notifyInfo.getUrl());
+        art.setImageUrl(notifyInfo.getThemeUrl());
+        art.setFromWebSite(notifyInfo.getFrom());
+        art.setTitle(notifyInfo.getTitle());
+        art.setShotDesc(notifyInfo.getMessage());
+        return art;
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        LocalStorageHelper.init(this);
+        /*
+        new AppConfigService().loadAppConfig();
+        while(AppConfigService.getConfig("config") == null){
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if(webpaes == null || webpaes.isEmpty()) {
+            int count = 0;
+            while ((LocalStorageHelper.getFromFile("config") == null || LocalStorageHelper.getFromFile("config").isEmpty()) && count < 3){
+                try {
+                    Thread.sleep(6000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                count ++;
+            }
+            if(LocalStorageHelper.getFromFile("config") != null)
+                initWebpages();
+        }
+        */
+    }
+    ProgressDialog pd = null;
+    void configWebView(WebView wv) {
+        if(wv != null) {
+            wv.addJavascriptInterface(new View(this),"Android");
+            wv.addJavascriptInterface(new CoreOpenAPIs(this),"AndroidWebstoreAPIs");
+            wv.getSettings().setJavaScriptEnabled(true);
+            wv.getSettings().setDatabaseEnabled(true);
+            wv.getSettings().setDomStorageEnabled(true);
+            wv.getSettings().setAppCacheEnabled(true);
+            wv.setScrollBarStyle(android.view.View.SCROLLBARS_INSIDE_OVERLAY);
+            wv.setWebChromeClient(new WebChromeClient(){});
+            wv.setWebViewClient(new WebViewClient(){
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                    if(url.startsWith("http://360hay.com")){
+                        view.loadUrl(url);
+                    }else{
+                        Intent intent = new Intent(getApplicationContext(), OpenArticleActivity.class);
+                        intent.putExtra("url",url);
+                        intent.putExtra("article",false);
+                        startActivity(intent);
+                    }
+                    return true;
+                }
+                @Override
+                public void onPageStarted(WebView view, String url, Bitmap favicon)
+                {
+
+                    timerDelayRemoveDialog(1000, pd);
+                }
+
+                @Override
+                public void onPageFinished(WebView view, String url)
+                {
+
+                    super.onPageFinished(view, url);
+                }
+
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                    final String mimeType = "text/html";
+                    final String encoding = "UTF-8";
+                    String html = "<link rel=\"stylesheet\" href=\"file:///android_asset/style.css\">  <b class='red_color'>Không thể mở nội dung</b></br>Vui lòng kiểm tra lại kết nối internet.";
+                    view.loadDataWithBaseURL("file:///android_asset/", html, mimeType, encoding, "");
+                }
+            });
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        }
+    }
+    public void timerDelayRemoveDialog(long time, final Dialog d){
+        new Handler().postDelayed(new Runnable() {
+            public void run() {
+                if(d != null)
+                    d.dismiss();
+            }
+        }, time);
+    }
+    public void animate(final WebView view, int mode) {
+        Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), mode);
+        view.startAnimation(anim);
+    }
+}

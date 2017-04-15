@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_inbox"
+            android:icon="@drawable/ic_mail_outline_black_24dp"
+            android:title="@string/nav_notification"/>
+        <!--
+
+                <item
+                    android:id="@+id/nav_entertainments"
+                    android:icon="@drawable/ic_tag_faces_white_24dp"
+                    android:title="@string/nav_entertain" />
+                <item
+                    android:id="@+id/nav_music_film"
+                    android:icon="@drawable/ic_library_music_white_24dp"
+                    android:title="@string/nav_music_film"/>
+
+                <item
+                    android:id="@+id/nav_knowledge"
+                    android:icon="@drawable/ic_library_books_white_24dp"
+                    android:title="@string/nav_knowledge" />
+
+                <item
+                    android:id="@+id/nav_findaround"
+                    android:icon="@drawable/ic_location_on_white_24dp"
+                    android:title="@string/nav_findaround"/>
+                <item
+                    android:id="@+id/nav_webapps"
+                    android:icon="@drawable/ic_apps_white_24dp"
+                    android:title="@string/nav_util"/>
+                <item
+                    android:id="@+id/nav_webstore"
+                    android:icon="@drawable/ic_web_white_24dp"
+                    android:title="@string/nav_webstore"/>
+                    -->
+    </group>
+</menu>
