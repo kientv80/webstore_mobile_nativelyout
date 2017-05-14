@@ -21,7 +21,7 @@ public class Notification {
     public static final String NOTIFICATION = "notification";
 
     public static void notifyNewUpate(Context context, String title, String content, int icon, int notifyId) {
-        NotificationCompat.Builder mBuilder =new NotificationCompat.Builder(context).setSmallIcon(icon).setContentTitle(title).setContentText(content);
+        NotificationCompat.Builder mBuilder =new NotificationCompat.Builder(context).setSmallIcon(icon).setContentTitle(title).setContentText(content).setNumber(1);
         Intent resultIntent = new Intent(context, NotificationActivity.class);
         resultIntent.putExtra(FROM, NOTIFICATION);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);

@@ -35,17 +35,20 @@ public class ActivityLogService {
         }
     }
     private void userActivityLogConsumer(){
+
         new Thread(){
             @Override
             public void run() {
+                long submitTime=0;
                 while(true){
                     try {
                         UserActivity log = activities.take();
                         logCache.add(log);
-                        if(logCache.size() > 3){
+                        //if(logCache.size() > 3 || (System.currentTimeMillis()-submitTime) > 5*60*1000){
                             submitLogToServer();
-                        }
-                    } catch (InterruptedException e) {
+                           // submitTime = System.currentTimeMillis();
+                       // }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }

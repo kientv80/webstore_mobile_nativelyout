@@ -1,12 +1,14 @@
 <resources>
-    <string name="app_name">Báo Việt</string>
+    <string name="app_name">Tin Mới</string>
     <string name="nav_news">Tin Tức</string>
+    <string name="news">Tin Tức</string>
     <string name="nav_entertain">Giải Trí</string>
     <string name="nav_games">Games</string>
     <string name="nav_findaround">Tìm Quanh Đây</string>
     <string name="nav_webapps">Ứng Dụng Web</string>
     <string name="nav_util">Tiện Ích</string>
-
+    <string name="nav_worldnews">Tin Tức Báo Tiếng Anh</string>
+    <string name="nav_vnnews">Tin Tức Báo Việt Nam</string>
     <string name="nav_entertainment">Người Nổi Tiếng</string>
     <string name="nav_music">Nghe Nhạc</string>
     <string name="nav_film">Xem Phim</string>
@@ -41,5 +43,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="nav_setting">Cấu Hình</string>
     <string name="nav_notification">Thông Báo Mới</string>
+    <string name="translate">Translate</string>
+    <string name="cancel">Cancel</string>
 
 </resources>

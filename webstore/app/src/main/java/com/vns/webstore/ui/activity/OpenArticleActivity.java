@@ -18,7 +18,7 @@ import android.widget.ImageButton;
 import com.vns.webstore.middleware.network.ConnectionManager;
 import com.webstore.webstore.R;
 
-public class OpenArticleActivity extends AppCompatActivity {
+public class OpenArticleActivity extends BaseActivity {
     public static final String MYTYPE = "text/html";
     public static final String UTF_8 = "UTF-8";
     WebView wvDetail = null;
@@ -101,10 +101,6 @@ public class OpenArticleActivity extends AppCompatActivity {
             wvDetailTmp.setVisibility(View.VISIBLE);
         }
 
-    }
-    private void animate(final WebView view, int mode) {
-        Animation anim = AnimationUtils.loadAnimation(getBaseContext(),mode);
-        view.startAnimation(anim);
     }
 
     @Override

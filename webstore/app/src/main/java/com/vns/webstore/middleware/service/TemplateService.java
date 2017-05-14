@@ -15,10 +15,10 @@ public class TemplateService {
         });*/
         StringBuilder template = new StringBuilder();
         template.append("<div class='article'>\n" +
-                        "\t<h3>%s</h3>\n" +
-                        "\t<p  style='color:#999;'>%s ( %s )</p>\n" +
-                        "\t<p>%s</p>\n" +
                         "\t<img src=%s>\n" +
+                        "\t<h3>%s</h3>\n" +
+                        "\t<p  style='color:#999;font-size:small;'>%s ( %s )</p>\n" +
+                        "\t<p>%s</p>\n" +
                         "<p style='background-color:#e9ebee;'>" +
                         "<img src='file:///android_asset/loading.gif' style='padding:8px;'>" +
                         "<span> %s </span>" +

@@ -69,7 +69,7 @@ public class WebstoreService {
                                 listener.haveNewUpdate(newNotifyInfoList, newNotifyCount);
                             }
 
-                        } catch (JSONException e) {
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }

@@ -78,6 +78,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
         articleViewHolder.articleTitle.setText(article.getTitle());
         articleViewHolder.setUrl(article.getUrl());
         articleViewHolder.setArticleHtml(renderArticle(article));
+        articleViewHolder.setArticle(article);
         if(articleViewHolder.articleDesc != null && article.getShotDesc() != null){
             articleViewHolder.articleDesc.setText(article.getShotDesc());
         }
@@ -94,7 +95,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
         if(articleObj.getShotDesc() == null)
             articleObj.setShotDesc("");
 
-        String articleHtml = f.format(template,articleObj.getTitle(),articleObj.getFromWebSite(),articleObj.getStrDate(),articleObj.getShotDesc(),articleObj.getImageUrl(),this.context.getResources().getString(R.string.msg_web_loading)).toString();
+        String articleHtml = f.format(template,articleObj.getImageUrl(),articleObj.getTitle(),articleObj.getFromWebSite(),articleObj.getStrDate(),articleObj.getShotDesc(),this.context.getResources().getString(R.string.msg_web_loading)).toString();
         return articleHtml;
     }
 

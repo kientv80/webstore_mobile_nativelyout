@@ -109,9 +109,9 @@ public class WebstoreBackgroundService extends Service{
                 try {
                     if (notifyInfoList != null && !notifyInfoList.isEmpty()) {
                         if (notifyInfoList.size() > 1) {
-                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle() + ". Và " + (notifyInfoList.size() - 1) + " tin khác.", R.drawable.ic_update_white_36dp, Notification.NOTIFY_ID_NEWS_UPDATE);
+                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle() + ". Và " + (notifyInfoList.size() - 1) + " tin khác.", R.drawable.appicon, Notification.NOTIFY_ID_NEWS_UPDATE);
                         } else {
-                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle(), R.drawable.ic_update_white_36dp, Notification.NOTIFY_ID_NEWS_UPDATE);
+                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle(), R.drawable.appicon, Notification.NOTIFY_ID_NEWS_UPDATE);
                         }
 
                     }

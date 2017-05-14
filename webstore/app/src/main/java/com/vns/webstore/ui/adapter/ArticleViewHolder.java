@@ -9,8 +9,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.vns.webstore.middleware.entity.Article;
+import com.vns.webstore.middleware.service.ActivityLogService;
+import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.ui.activity.OpenArticleActivity;
 import com.webstore.webstore.R;
+import com.webstore.webstore.entity.UserActivity;
+
+import org.json.JSONObject;
 
 /**
  * Created by root on 18/02/2017.
@@ -26,6 +32,8 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder implements View.O
     private String url;
     private String articleHtml;
     private int index;
+    private Article article;
+
     public ArticleViewHolder(View view, boolean wideImage) {
         super(view);
         ownerAvatar = (ImageView) view.findViewById(R.id.owner_avatar);
@@ -48,10 +56,13 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder implements View.O
 
     @Override
     public void onClick(View view) {
+
         Intent intent = new Intent(view.getContext(), OpenArticleActivity.class);
         intent.putExtra("url",url);
         intent.putExtra("article",true);
         intent.putExtra("articleHtml",getArticleHtml());
+        JSONObject data = new JSONObject();
+        ActivityLogService.getInstance().logUserActivity(new UserActivity("open_article","ARTICLE", JSONHelper.toJSON(getArticle())));
         view.getContext().startActivity(intent);
     }
 
@@ -81,5 +92,13 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder implements View.O
 
     public void setType(TextView type) {
         this.type = type;
+    }
+
+    public Article getArticle() {
+        return article;
+    }
+
+    public void setArticle(Article article) {
+        this.article = article;
     }
 }

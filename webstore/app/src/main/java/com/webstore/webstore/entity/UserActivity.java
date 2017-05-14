@@ -1,5 +1,8 @@
 package com.webstore.webstore.entity;
 
+import android.content.res.Configuration;
+
+import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.ProfileService;
 
 import java.text.SimpleDateFormat;
@@ -64,7 +67,7 @@ public class UserActivity {
     @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
-        b.append(getDate()).append("\t").append(getType()).append("\t").append(getUserId()).append("\t").append(getAction()).append("\t").append(getData());
+        b.append(getDate()).append("\t").append(getUserId()).append("\t").append(AppConfigService.CLIENT_VERSION).append("\t").append(getType()).append("\t").append(getAction()).append("\t").append(getData());
         return b.toString();
     }
 }

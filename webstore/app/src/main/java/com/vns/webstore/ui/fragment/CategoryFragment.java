@@ -10,14 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.vns.webstore.middleware.entity.CateItem;
-import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.middleware.utils.JSONHelper;
-import com.vns.webstore.ui.adapter.ArticleAdapter;
 import com.vns.webstore.ui.adapter.CategoryAdapter;
 import com.vns.webstore.ui.adapter.ClickListener;
 import com.webstore.webstore.R;
@@ -58,7 +56,11 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
     }
 
     private void loadCategories(ViewGroup container) throws JSONException {
-        String categories = LocalStorageHelper.getFromFile("categories");
+        String type = "";
+        if(worldNews)
+            type = "worldnews";
+
+        String categories = LocalStorageHelper.getFromFile("categories"+type);
         if(categories != null && !categories.isEmpty()){
             JSONObject cates = new JSONObject(categories);
             if(cates.has("data")) {
@@ -66,11 +68,11 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
                 if(cateData.has("categories"))
                     renderCategories(cateData.getString("categories"));
                 if (((System.currentTimeMillis() - cates.getLong("cachedTime")) > 30 * 60 * 1000)) {
-                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category", null, "categories");
+                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type=" + type, null, "categories"+type);
                 }
             }
         } else {
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category", this,"categories");
+            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type="+ type, this,"categories"+type);
         }
 
     }
@@ -144,5 +146,11 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
 
     public void setOnClickListener(ClickListener onClickListener) {
         this.onClickListener = onClickListener;
+    }
+
+    private boolean worldNews;
+
+    public void setWorldNews(boolean worldNews) {
+        this.worldNews = worldNews;
     }
 }

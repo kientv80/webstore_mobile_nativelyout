@@ -35,7 +35,7 @@ import java.util.List;
  * Created by root on 19/03/2017.
  */
 
-public class NotificationActivity extends AppCompatActivity {
+public class NotificationActivity extends BaseActivity {
     RecyclerView articlesListingView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {

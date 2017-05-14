@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -19,25 +20,30 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.NotifyInfo;
 import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.ErrorCode;
+import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.LocationService;
+import com.vns.webstore.middleware.service.ProfileService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.middleware.worker.WebstoreBackgroundService;
 import com.vns.webstore.ui.adapter.ClickListener;
 import com.vns.webstore.ui.adapter.PagerAdapter;
+import com.vns.webstore.ui.dialog.TranslateDialog;
 import com.vns.webstore.ui.fragment.ArticleFragment;
 import com.vns.webstore.ui.fragment.CategoryFragment;
-import com.vns.webstore.ui.notification.Notification;
 import com.webstore.webstore.R;
+import com.webstore.webstore.entity.UserActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,6 +59,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     long pausedTime;
     FloatingActionButton floatingBtn;
     RecyclerView articlesListingView;
+    //List<ViewPagerInfo> viewPagerInfos = new ArrayList<>();
     //ProgressBar progressBar;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +67,36 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         setContentView(R.layout.main_layout);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        ImageButton vnlag = (ImageButton)findViewById(R.id.vnflag);
+        vnlag.setOnClickListener((new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                LocalStorageHelper.saveToFile("selectworldnews","false");
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }));
+        ImageButton uslag = (ImageButton)findViewById(R.id.usflag);
+        uslag.setOnClickListener((new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                LocalStorageHelper.saveToFile("selectworldnews","true");
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        }));
+
+        floatingBtn = (FloatingActionButton) findViewById(R.id.floatingBtn);
+        floatingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new TranslateDialog().show(getFragmentManager(),null);
+            }
+        });
+        floatingBtn.hide();
+
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -67,12 +104,30 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         init();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ArticleLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
+        //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ListLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
+        TextView titleText = (TextView)findViewById(R.id.title);
+
+        CategoryFragment categoryFragment = new CategoryFragment();
+        String url = "http://360hay.com/mobile/article/tintuc";
+        String title = getResources().getString(R.string.news);
+        String catetitle = "Danh Mục";
+        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
+        String name = "tintuc";
+        if(worldNews != null && "true".equals(worldNews)){
+            url = "http://360hay.com/mobile/article/worldnews";
+            categoryFragment.setWorldNews(true);
+            catetitle = "Categories";
+            name="worldnews";
+            title = "Hot News";
+            titleText.setText(title);
+            floatingBtn.show();
+        }
 
         List<Fragment> fragments = new ArrayList<Fragment>();
-        createFragment("http://360hay.com/mobile/article/tintuc","Tin Tuc",fragments);
-        CategoryFragment categoryFragment = new CategoryFragment();
+        createFragment(url,title,name,fragments);
         Bundle args = new Bundle();
-        args.putString("title","Danh Muc");
+        args.putString("title",catetitle);
         categoryFragment.setArguments(args);
         fragments.add(categoryFragment);
         categoryFragment.setOnClickListener(new ClickListener() {
@@ -80,6 +135,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onClick(Object data) {
                 JSONObject jsonObject = (JSONObject) data;
                 try {
+                    ActivityLogService.getInstance().logUserActivity(new UserActivity("open_category","CATEGORY",jsonObject.toString()));
                     if(!jsonObject.getBoolean("openLink")){
                         PagerAdapter pagerAdapter = (PagerAdapter)viewPager.getAdapter();
                         final ArticleFragment af =  (ArticleFragment)pagerAdapter.getItem(0);
@@ -94,7 +150,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         startActivity(intent);
                     }
 
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
@@ -128,13 +184,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
         startService(backgroundService) ;
     }
-    private void createFragment(String url, String title, List<Fragment> fragments){
+    private void createFragment(String url, String title,String name, List<Fragment> fragments){
         ArticleFragment af = new ArticleFragment();
         Bundle args = new Bundle();
         args.putString("title",title);
         af.setArguments(args);
         af.setUrl(url);
-        af.setName("tintuc");
+        af.setName(name);
         fragments.add(af);
     }
     private void callback(Object data){
@@ -165,10 +221,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
-
                 }
             });
-
         }
 
     }
@@ -182,8 +236,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     protected void onResume() {
-        System.out.println("MainActivity  onResume");
-        init();
         if(pausedTime > 0 && (System.currentTimeMillis()-pausedTime) > 10*60*1000){
             //Reload
             System.out.println("MainActivity  reload pausedTime");
@@ -195,15 +247,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    private void init() {
-        ConnectionManager.isNetworkAvailable(getApplicationContext());
-        LocalStorageHelper.init(getApplicationContext());
-        try {
-            AppConfigService.getWebsiteinfo();//Load webinfo
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
     @Override
     protected void onDestroy() {
@@ -221,31 +264,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             Intent intent = new Intent(getApplicationContext(),NotificationActivity.class);
             startActivity(intent);
         }
-        /*
-        else if (id == R.id.nav_entertainments) {
-            title.setText(R.string.nav_entertain);
-        } else if (id == R.id.nav_music_film) {
-            title.setText(R.string.nav_music_film);
-        } else if (id == R.id.nav_knowledge) {
-            title.setText(R.string.nav_knowledge);
-        } else if (id == R.id.nav_webapps) {
-            title.setText(R.string.nav_webapps);
-
-        }else if (id == R.id.nav_webstore) {
-            title.setText(R.string.nav_webstore);
-
-        }else if (id == R.id.nav_findaround) {
-            if(LocationService.isLocationPermissionGrant(getApplicationContext())){
-                LocationService.requestLocationPermission(this,getApplicationContext());
-            }else{
-                Location location = LocationService.getLocation(this,getApplicationContext());
-                LocationService.saveLocation(location);
-            }
-            title.setText(R.string.nav_findaround);
-
-        }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);*/
         return true;
     }
     private void updateViewPager(){

@@ -19,11 +19,19 @@ import android.webkit.WebViewClient;
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.NotifyInfo;
 import com.vns.webstore.middleware.entity.WebPage;
+import com.vns.webstore.middleware.network.ConnectionManager;
+import com.vns.webstore.middleware.service.ActivityLogService;
+import com.vns.webstore.middleware.service.AppConfigService;
+import com.vns.webstore.middleware.service.ProfileService;
 import com.vns.webstore.middleware.service.TemplateService;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.openapi.CoreOpenAPIs;
 import com.vns.webstore.openapi.View;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
+import com.webstore.webstore.entity.UserActivity;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Formatter;
 import java.util.HashMap;
@@ -102,31 +110,30 @@ public class BaseActivity  extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LocalStorageHelper.init(this);
-        /*
-        new AppConfigService().loadAppConfig();
-        while(AppConfigService.getConfig("config") == null){
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        init();
+        JSONObject data = new JSONObject();
+        try {
+            data.put("Activity",getClass().getSimpleName());
+            ActivityLogService.getInstance().logUserActivity(new UserActivity("UIActivity","OpenActivity",data.toString()));
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        if(webpaes == null || webpaes.isEmpty()) {
-            int count = 0;
-            while ((LocalStorageHelper.getFromFile("config") == null || LocalStorageHelper.getFromFile("config").isEmpty()) && count < 3){
-                try {
-                    Thread.sleep(6000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                count ++;
-            }
-            if(LocalStorageHelper.getFromFile("config") != null)
-                initWebpages();
-        }
-        */
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        init();
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     ProgressDialog pd = null;
     void configWebView(WebView wv) {
         if(wv != null) {
@@ -189,5 +196,16 @@ public class BaseActivity  extends AppCompatActivity {
     public void animate(final WebView view, int mode) {
         Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), mode);
         view.startAnimation(anim);
+    }
+
+    public void init() {
+        ConnectionManager.isNetworkAvailable(getApplicationContext());
+        LocalStorageHelper.init(getApplicationContext());
+        try {
+            AppConfigService.getWebsiteinfo();//Load webinfo
+            ProfileService.getProfile(getApplicationContext());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

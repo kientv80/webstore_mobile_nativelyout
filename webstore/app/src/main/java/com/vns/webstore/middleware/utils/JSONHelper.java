@@ -22,12 +22,16 @@ public class JSONHelper {
         return g.fromJson(json,clazz);
     }
     public static <T> List toObjects(String json, Class<T> clazz){
-        Gson g = new Gson();
-        JsonParser p = new JsonParser();
-        JsonArray items = p.parse(json).getAsJsonArray();
         List<T> result = new ArrayList<>();
-        for(int i =0;i< items.size();i++){
-            result.add(g.fromJson(items.get(i),clazz));
+        try {
+            Gson g = new Gson();
+            JsonParser p = new JsonParser();
+            JsonArray items = p.parse(json).getAsJsonArray();
+            for (int i = 0; i < items.size(); i++) {
+                result.add(g.fromJson(items.get(i), clazz));
+            }
+        }catch (Exception ex){
+
         }
         return result;
     }
