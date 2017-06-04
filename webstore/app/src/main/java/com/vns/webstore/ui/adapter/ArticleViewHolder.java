@@ -33,9 +33,14 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder implements View.O
     private String articleHtml;
     private int index;
     private Article article;
-
+    View view;
+    boolean wideImage;
     public ArticleViewHolder(View view, boolean wideImage) {
         super(view);
+        this.view = view;
+        this.wideImage = wideImage;
+    }
+    public void initUI(View view){
         ownerAvatar = (ImageView) view.findViewById(R.id.owner_avatar);
         ownerName = (TextView) view.findViewById(R.id.owner_name);
         type = (TextView) view.findViewById(R.id.type);
@@ -53,7 +58,6 @@ public class ArticleViewHolder extends RecyclerView.ViewHolder implements View.O
             articleDesc = (TextView) view.findViewById(R.id.article_desc);
         }
     }
-
     @Override
     public void onClick(View view) {
 

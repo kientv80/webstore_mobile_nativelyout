@@ -1,5 +1,6 @@
 package com.vns.webstore.ui.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.CateItem;
+import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
@@ -22,6 +24,7 @@ import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.middleware.worker.WebstoreBackgroundService;
+import com.vns.webstore.ui.activity.NotificationActivity;
 import com.vns.webstore.ui.adapter.ArticleAdapter;
 import com.webstore.webstore.R;
 import com.webstore.webstore.entity.UserActivity;
@@ -49,12 +52,13 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
     boolean loadMore;
     int visibleThreshold = 5;
     private String name;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.recyclerview_listing,container,false);
-        articlesListingView = (RecyclerView)viewGroup.findViewById(R.id.recyclerview);
+        ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.recyclerview_listing, container, false);
+        articlesListingView = (RecyclerView) viewGroup.findViewById(R.id.recyclerview);
         articlesListingView.setHasFixedSize(false);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         articlesListingView.setLayoutManager(layoutManager);
@@ -73,81 +77,92 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
         loadArticles(container);
         return viewGroup;
     }
-;
-    public void reloadArticle(){
+
+    ;
+
+    public void reloadArticle() {
         loadArticles(null);
     }
 
     int currentIndex = 0;
-    int totalArticles =0;
-    private void loadMores(){
-        ArticleAdapter adapter = (ArticleAdapter)articlesListingView.getAdapter();
-        if(adapter == null && totalArticles == 0 || totalArticles != adapter.getItemCount()){
-            totalArticles = adapter.getItemCount();
-        }else{
-            return;
-        }
-        currentIndex+=10;
-        HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex , this, null);
-    }
-    public void loadArticles(ViewGroup container){
-            currentIndex = 0;
-            renderArticlesFromCache();
-            String articles = LocalStorageHelper.getFromFile(getName());
-            if(articles != null && !articles.isEmpty()){
-                try {
-                    JSONObject json = new JSONObject(articles.toString());
-                    if(((System.currentTimeMillis() - json.getLong("cachedTime")) > (30*60*1000))){
-                        HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, name);
-                    }
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
-            }else {
-                System.out.println("Loading articles");
-                HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex , this, name);
+    int totalArticles = 0;
+
+    private void loadMores() {
+        if (ConnectionManager.isNetworkAvailable()) {
+            ArticleAdapter adapter = (ArticleAdapter) articlesListingView.getAdapter();
+            if (adapter == null && totalArticles == 0 || totalArticles != adapter.getItemCount()) {
+                totalArticles = adapter.getItemCount();
+            } else {
+                return;
             }
+            currentIndex += 10;
+            HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, null);
+        }
     }
-    private void renderArticlesFromCache(){
+
+    public void loadArticles(ViewGroup container) {
+        currentIndex = 0;
+        String articles = LocalStorageHelper.getFromFile(getName());
+        if (articles != null && !articles.isEmpty()) {
+            try {
+                JSONObject json = new JSONObject(articles.toString());
+                if (((System.currentTimeMillis() - json.getLong("cachedTime")) > (30 * 60 * 1000))) {
+                    HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, name);
+                } else {
+                    renderArticlesFromCache();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            System.out.println("Loading articles");
+            HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, name);
+        }
+    }
+
+    private void renderArticlesFromCache() {
         String articles = LocalStorageHelper.getFromFile(getName());
         List<Article> listArticles = new ArrayList<>();
-        if("tintuc".equals(getName())) {
+        if ("tintuc".equals(getName())) {
             String updates = LocalStorageHelper.getFromFile(WebstoreBackgroundService.UPDATE);
             if (updates != null && !updates.isEmpty()) {
                 try {
                     JSONObject json = new JSONObject(updates.toString());
-                    if(json.has("data"))
+                    if (json.has("data"))
                         listArticles = toArticles(json.getString("data"));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
         }
-        if(articles != null && !articles.isEmpty()){
+        if (articles != null && !articles.isEmpty()) {
             try {
                 JSONObject json = new JSONObject(articles.toString());
-                if(json.has("data")) {
+                if (json.has("data")) {
                     listArticles.addAll(toArticles(json.getString("data")));
                     renderArticle(listArticles);
                 }
-            }catch (Exception ex){
+            } catch (Exception ex) {
                 ex.printStackTrace();
             }
         }
     }
+
     @Override
     public void onResume() {
         System.out.println("ArticleFragment onResume");
-        if((System.currentTimeMillis() - pausedTime) > 30*60*1000){
+        if ((System.currentTimeMillis() - pausedTime) > 30 * 60 * 1000) {
             System.out.println("ArticleFragment onResume reload article");
             super.onResume();
             currentIndex = 0;
-            HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex , this, name);
-        }else{
+            HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, name);
+        } else {
             super.onResume();
         }
     }
+
     long pausedTime;
+
     @Override
     public void onPause() {
         super.onPause();
@@ -177,16 +192,19 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
     }
 
     @Override
-    public void onRecievedData(Object data,final ErrorCode errorCode) {
-        if (data != null && !data.toString().isEmpty()) {
-            List<Article> articles = toArticles(data);
-            renderArticle(articles);
-        }
-        if(errorCode != null && errorCode.getErrorCode() != ErrorCode.ERROR_CODE.SUCCESSED){
+    public void onRecievedData(Object data, final ErrorCode errorCode) {
+        if (errorCode != null && errorCode.getErrorCode() == ErrorCode.ERROR_CODE.SUCCESSED) {
+            if (data != null && !data.toString().isEmpty()) {
+                List<Article> articles = toArticles(data);
+                if(articles.size() > 0) {
+                    renderArticle(articles);
+                }
+            }
+        } else {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast notify = Toast.makeText(getContext(),errorCode.getErrorMsg(),Toast.LENGTH_LONG);
+                    Toast notify = Toast.makeText(getContext(), errorCode.getErrorMsg(), Toast.LENGTH_LONG);
                     notify.show();
                 }
             });
@@ -194,47 +212,59 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
         }
     }
 
-    private void renderArticle(final List<Article> articles ) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Set<Article> uniqueArts = new HashSet<>(articles);
-                    List<Article>  sortUniqueArticles = new ArrayList<Article>(uniqueArts);
-                    Collections.sort(sortUniqueArticles);
-                    ArticleAdapter adapter = (ArticleAdapter)articlesListingView.getAdapter();
-                    if(adapter == null){
-                        adapter = new ArticleAdapter(getContext(),sortUniqueArticles);
-                        articlesListingView.setAdapter(adapter);
-                    }else {
-                        int itemCount = adapter.getItemCount();
-                        if(currentIndex == 0){
-                            adapter.getArticles().clear();
-                            articlesListingView.getAdapter().notifyItemRangeRemoved(0,itemCount);
-                            adapter.getArticles().addAll(sortUniqueArticles);
-                            articlesListingView.getAdapter().notifyItemRangeInserted(0,sortUniqueArticles.size());
-                        }else{
-                            adapter.getArticles().addAll(sortUniqueArticles);
-                            articlesListingView.getAdapter().notifyItemRangeInserted(itemCount,sortUniqueArticles.size()+itemCount);
+    private void renderArticle(final List<Article> articles) {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Set<Article> uniqueArts = new HashSet<>(articles);
+                        List<Article> sortUniqueArticles = new ArrayList<Article>(uniqueArts);
+                        Collections.sort(sortUniqueArticles);
+                        ArticleAdapter adapter = (ArticleAdapter) articlesListingView.getAdapter();
+                        if (adapter == null) {
+                            adapter = new ArticleAdapter(getContext(), sortUniqueArticles);
+                            articlesListingView.setAdapter(adapter);
+                        } else {
+                            int itemCount = adapter.getItemCount();
+                            if (currentIndex == 0) {
+                                adapter.getArticles().clear();
+                                articlesListingView.getAdapter().notifyItemRangeRemoved(0, itemCount);
+                                adapter.getArticles().addAll(sortUniqueArticles);
+                                articlesListingView.getAdapter().notifyItemRangeInserted(0, sortUniqueArticles.size());
+                            } else {
+                                List<Article> currentArticles = adapter.getArticles();
+                                int countNew = 0;
+                                for(Article c : sortUniqueArticles){
+                                    if(!currentArticles.contains(c)){
+                                        currentArticles.add(c);
+                                        countNew++;
+                                    }
+                                }
+                                if(countNew >0) {
+                                    articlesListingView.getAdapter().notifyItemRangeInserted(itemCount, countNew + itemCount);
+                                }
+                            }
                         }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName() + ".renderArticle", "ERROR", ex.getMessage()));
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName()+".renderArticle","ERROR",ex.getMessage()));
                 }
-            }
-        });
+            });
+        }
     }
-    private List<Article> toArticles(Object data){
+
+    private List<Article> toArticles(Object data) {
         List<Article> articles = new ArrayList<>();
         try {
             JsonParser parser = new JsonParser();
             JsonObject jsonData = parser.parse(data.toString()).getAsJsonObject();
-            if(jsonData.has("categories")) {
+            if (jsonData.has("categories")) {
                 JsonArray categories = jsonData.getAsJsonArray("categories");
                 for (int i = 0; i < categories.size(); i++) {
                     JsonObject category = categories.get(i).getAsJsonObject();
-                    if(category.has("news")) {
+                    if (category.has("news")) {
                         JsonArray news = category.getAsJsonArray("news");
                         for (int j = 0; j < news.size(); j++) {
                             articles.add((Article) JSONHelper.toObject(news.get(j).toString(), Article.class));
@@ -244,15 +274,16 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName()+".toArticles","ERROR",e.getMessage()));
+            ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName() + ".toArticles", "ERROR", e.getMessage()));
         }
         return articles;
     }
+
     private List<CateItem> groupByCategory(List<Article> articles) {
-        Map<String,CateItem> categories = new HashMap<>();
-        for(Article art : articles){
-            if(!categories.containsKey(art.getParentCateName())){
-                categories.put(art.getParentCateName(),new CateItem());
+        Map<String, CateItem> categories = new HashMap<>();
+        for (Article art : articles) {
+            if (!categories.containsKey(art.getParentCateName())) {
+                categories.put(art.getParentCateName(), new CateItem());
                 art.setMainArticle(true);
             }
             categories.get(art.getParentCateName()).getArticles().add(art);

@@ -111,8 +111,12 @@ public class Article implements Comparable{
         if (o == null || getClass() != o.getClass()) return false;
 
         Article article = (Article) o;
-
-        return id != null ? id.equals(article.id) : article.id == null;
+        if(id == article.getId())
+            return true;
+        else if (getTitle().equals(article.getTitle())){
+            return true;
+        }
+        return false;
 
     }
 

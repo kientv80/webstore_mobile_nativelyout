@@ -30,5 +30,11 @@
             </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
     <include layout="@layout/view_article_activity_content" />
-
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@drawable/ic_translate_black_24dp" android:visibility="invisible"/>
 </android.support.design.widget.CoordinatorLayout>

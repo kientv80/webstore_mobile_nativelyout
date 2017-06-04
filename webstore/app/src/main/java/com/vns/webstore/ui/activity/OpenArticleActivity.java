@@ -2,6 +2,8 @@ package com.vns.webstore.ui.activity;
 
 import android.app.ProgressDialog;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +18,8 @@ import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 
 import com.vns.webstore.middleware.network.ConnectionManager;
+import com.vns.webstore.middleware.storage.LocalStorageHelper;
+import com.vns.webstore.ui.dialog.TranslateDialog;
 import com.webstore.webstore.R;
 
 public class OpenArticleActivity extends BaseActivity {
@@ -39,6 +43,17 @@ public class OpenArticleActivity extends BaseActivity {
                 finish();
             }
         });
+        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
+        if(worldNews != null && "true".equals(worldNews)) {
+            enableFloatingActionButton(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    TranslateDialog d = new TranslateDialog();
+                    d.show(getFragmentManager(), null);
+
+                }
+            }, true);
+        }
         if (wvDetail == null)
             wvDetail = (WebView) findViewById(R.id.webview_detail);
         if (wvDetailTmp == null)

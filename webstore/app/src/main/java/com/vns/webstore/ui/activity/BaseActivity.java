@@ -4,10 +4,13 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
@@ -15,11 +18,15 @@ import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.NotifyInfo;
 import com.vns.webstore.middleware.entity.WebPage;
 import com.vns.webstore.middleware.network.ConnectionManager;
+import com.vns.webstore.middleware.network.ErrorCode;
+import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.ProfileService;
@@ -28,6 +35,9 @@ import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.openapi.CoreOpenAPIs;
 import com.vns.webstore.openapi.View;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
+import com.vns.webstore.ui.dialog.TranslateDialog;
+import com.vns.webstore.ui.dialog.UpdateDialog;
+import com.webstore.webstore.R;
 import com.webstore.webstore.entity.UserActivity;
 
 import org.json.JSONException;
@@ -38,10 +48,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+
 /**
  * Created by LAP10572-local on 8/29/2016.
  */
-public class BaseActivity  extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity {
     public static final String FINDAROUND = "findaround";
     public static final String KNOWLEDGE = "knowledge";
     public static final String MUSIC_FILM = "music_film";
@@ -50,38 +62,14 @@ public class BaseActivity  extends AppCompatActivity {
     public static final String UTIL = "util";
     public static final String WEBSTORE = "webstore";
     public static final String UPDATE = "update";
-    static Map<String,List<WebPage>> webpaes = new HashMap<>();
-    private static void initWebpages(){
-        /*
-        List<WebPage> news = new ArrayList<>();
-        JsonArray categories = new JsonParser().parse(AppConfigService.getConfig("categories")).getAsJsonArray();
-        for (int i = 0; i< categories.size();i++){
-            JsonElement jsonCates = categories.get(i);
-            JsonElement item = jsonCates.getAsJsonObject().get("items");
-            List<WebPage> pageItems = new ArrayList<>();
-            if(item != null) {
-                try{
-                    JsonArray items = item.getAsJsonArray();
-                    for (int j = 0; j < items.size();j++){
-                        JsonObject itemJson = items.get(j).getAsJsonObject();
-                        pageItems.add(new WebPage(itemJson.get("label").getAsString(),itemJson.get("url").getAsString()));
-                    }
-                    webpaes.put(jsonCates.getAsJsonObject().get("name").getAsString(),pageItems);
-                }catch (Exception ex){
-                    ex.printStackTrace();
-                }
+    static Map<String, List<WebPage>> webpaes = new HashMap<>();
+    FloatingActionButton floatingBtn;
 
-            }else{
-                pageItems.add(new WebPage(jsonCates.getAsJsonObject().get("label").getAsString(),jsonCates.getAsJsonObject().get("url").getAsString()));
-                webpaes.put(jsonCates.getAsJsonObject().get("name").getAsString(),pageItems);
-            }
-        }
-*/
-    }
+
 
     static String buildFeed() {
         String notify = LocalStorageHelper.getFromFile(UPDATE);
-        if(notify != null && !notify.isEmpty()) {
+        if (notify != null && !notify.isEmpty()) {
             List<NotifyInfo> notifyInfo = JSONHelper.toObjects(notify, NotifyInfo.class);
             String template = TemplateService.getNotifyTemplate();
             StringBuilder html = new StringBuilder();
@@ -96,7 +84,8 @@ public class BaseActivity  extends AppCompatActivity {
         }
         return "No new upate";
     }
-    private static Article toArticle(NotifyInfo notifyInfo){
+
+    private static Article toArticle(NotifyInfo notifyInfo) {
         Article art = new Article();
         art.setUrl(notifyInfo.getUrl());
         art.setImageUrl(notifyInfo.getThemeUrl());
@@ -113,17 +102,19 @@ public class BaseActivity  extends AppCompatActivity {
         init();
         JSONObject data = new JSONObject();
         try {
-            data.put("Activity",getClass().getSimpleName());
-            ActivityLogService.getInstance().logUserActivity(new UserActivity("UIActivity","OpenActivity",data.toString()));
+            data.put("Activity", getClass().getSimpleName());
+            ActivityLogService.getInstance().logUserActivity(new UserActivity("UIActivity", "OpenActivity", data.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
         init();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -135,39 +126,40 @@ public class BaseActivity  extends AppCompatActivity {
     }
 
     ProgressDialog pd = null;
+
     void configWebView(WebView wv) {
-        if(wv != null) {
-            wv.addJavascriptInterface(new View(this),"Android");
-            wv.addJavascriptInterface(new CoreOpenAPIs(this),"AndroidWebstoreAPIs");
+        if (wv != null) {
+            wv.addJavascriptInterface(new View(this), "Android");
+            wv.addJavascriptInterface(new CoreOpenAPIs(this), "AndroidWebstoreAPIs");
             wv.getSettings().setJavaScriptEnabled(true);
             wv.getSettings().setDatabaseEnabled(true);
             wv.getSettings().setDomStorageEnabled(true);
             wv.getSettings().setAppCacheEnabled(true);
             wv.setScrollBarStyle(android.view.View.SCROLLBARS_INSIDE_OVERLAY);
-            wv.setWebChromeClient(new WebChromeClient(){});
-            wv.setWebViewClient(new WebViewClient(){
+            wv.setWebChromeClient(new WebChromeClient() {
+            });
+            wv.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                    if(url.startsWith("http://360hay.com")){
+                    if (url.startsWith("http://360hay.com")) {
                         view.loadUrl(url);
-                    }else{
+                    } else {
                         Intent intent = new Intent(getApplicationContext(), OpenArticleActivity.class);
-                        intent.putExtra("url",url);
-                        intent.putExtra("article",false);
+                        intent.putExtra("url", url);
+                        intent.putExtra("article", false);
                         startActivity(intent);
                     }
                     return true;
                 }
+
                 @Override
-                public void onPageStarted(WebView view, String url, Bitmap favicon)
-                {
+                public void onPageStarted(WebView view, String url, Bitmap favicon) {
 
                     timerDelayRemoveDialog(1000, pd);
                 }
 
                 @Override
-                public void onPageFinished(WebView view, String url)
-                {
+                public void onPageFinished(WebView view, String url) {
 
                     super.onPageFinished(view, url);
                 }
@@ -185,14 +177,16 @@ public class BaseActivity  extends AppCompatActivity {
             }
         }
     }
-    public void timerDelayRemoveDialog(long time, final Dialog d){
+
+    public void timerDelayRemoveDialog(long time, final Dialog d) {
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                if(d != null)
+                if (d != null)
                     d.dismiss();
             }
         }, time);
     }
+
     public void animate(final WebView view, int mode) {
         Animation anim = AnimationUtils.loadAnimation(getApplicationContext(), mode);
         view.startAnimation(anim);
@@ -207,5 +201,15 @@ public class BaseActivity  extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void enableFloatingActionButton(android.view.View.OnClickListener listener, boolean visible) {
+        floatingBtn = (FloatingActionButton) findViewById(R.id.floatingBtn);
+        floatingBtn.setOnClickListener(listener);
+        if (!visible)
+            floatingBtn.hide();
+        else
+            floatingBtn.show();
     }
 }

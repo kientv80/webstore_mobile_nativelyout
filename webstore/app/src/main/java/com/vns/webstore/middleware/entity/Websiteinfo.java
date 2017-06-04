@@ -7,7 +7,13 @@ package com.vns.webstore.middleware.entity;
 public class Websiteinfo {
     private String icon;
     private String name;
-
+    private boolean isGoodImage;
+    public boolean getIsGoodImage(){
+        return isGoodImage;
+    }
+    public void setIsGoodImage(boolean isGoodImage){
+        this.isGoodImage = isGoodImage;
+    }
     public String getIcon() {
         return icon;
     }

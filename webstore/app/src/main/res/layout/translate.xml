@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -10,13 +10,18 @@
         <TextView android:layout_width="match_parent"  android:layout_height="wrap_content" android:text="Translate English-Vietnamese" android:paddingBottom="10dp"/>
     </LinearLayout>
     <EditText android:id="@+id/word" android:layout_height="wrap_content" android:layout_width="match_parent"  android:hint="Enter a word to translate" android:text="" />
-    <TextView android:layout_width="match_parent"  android:layout_height="100dp" android:id="@+id/translatedText" android:hint="Translate Result" android:paddingLeft="8dp"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="100dp">
+    <LinearLayout android:layout_height="match_parent" android:layout_width="match_parent" >
+    <TextView android:layout_width="match_parent"  android:layout_height="wrap_content" android:id="@+id/translatedText" android:hint="Translate Result" android:paddingLeft="8dp"
         android:ellipsize="marquee"
         android:marqueeRepeatLimit ="marquee_forever"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:scrollHorizontally="true"/>
-
+        />
+    </LinearLayout>
+    </ScrollView>
     <RelativeLayout android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_gravity="right">
         <Button
             android:layout_width="wrap_content"

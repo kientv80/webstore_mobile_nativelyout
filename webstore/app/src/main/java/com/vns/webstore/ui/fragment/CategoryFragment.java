@@ -106,29 +106,30 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
     }
 
     private void renderCategories(Object data) throws JSONException{
-        final List<CateItem> categories = JSONHelper.toObjects(data.toString(), CateItem.class);
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    RecyclerView.Adapter adapter = categoriesListingView.getAdapter();
-                    if(adapter == null) {
-                        adapter = new CategoryAdapter(getContext(), categories, onClickListener);
-                        categoriesListingView.setAdapter(adapter);
-                    }else{
-                        List<CateItem> cateItems = ((CategoryAdapter) adapter).getCateItems();
-                        int length = cateItems.size();
-                        cateItems.clear();
-                        cateItems.addAll(categories);
-                        categoriesListingView.notifyAll();
+        if(getActivity() != null) {
+            final List<CateItem> categories = JSONHelper.toObjects(data.toString(), CateItem.class);
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        RecyclerView.Adapter adapter = categoriesListingView.getAdapter();
+                        if (adapter == null) {
+                            adapter = new CategoryAdapter(getContext(), categories, onClickListener);
+                            categoriesListingView.setAdapter(adapter);
+                        } else {
+                            List<CateItem> cateItems = ((CategoryAdapter) adapter).getCateItems();
+                            int length = cateItems.size();
+                            cateItems.clear();
+                            cateItems.addAll(categories);
+                            categoriesListingView.notifyAll();
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName() + ".renderCategories", "ERROR", ex.getMessage()));
                     }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    ActivityLogService.getInstance().logUserActivity(new UserActivity(getClass().getSimpleName()+".renderCategories","ERROR",ex.getMessage()));
                 }
-            }
-        });
-
+            });
+        }
     }
 
     String title;

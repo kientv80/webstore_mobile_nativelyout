@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -21,6 +22,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -40,6 +42,7 @@ import com.vns.webstore.middleware.worker.WebstoreBackgroundService;
 import com.vns.webstore.ui.adapter.ClickListener;
 import com.vns.webstore.ui.adapter.PagerAdapter;
 import com.vns.webstore.ui.dialog.TranslateDialog;
+import com.vns.webstore.ui.dialog.UpdateDialog;
 import com.vns.webstore.ui.fragment.ArticleFragment;
 import com.vns.webstore.ui.fragment.CategoryFragment;
 import com.webstore.webstore.R;
@@ -57,7 +60,7 @@ import java.util.List;
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HttpRequestListener{
     ViewPager viewPager = null;
     long pausedTime;
-    FloatingActionButton floatingBtn;
+
     RecyclerView articlesListingView;
     //List<ViewPagerInfo> viewPagerInfos = new ArrayList<>();
     //ProgressBar progressBar;
@@ -65,6 +68,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
+        loadUI();
+        checkAppVersion();
+        //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
+        Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
+        startService(backgroundService) ;
+    }
+
+    private void loadUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ImageButton vnlag = (ImageButton)findViewById(R.id.vnflag);
@@ -87,15 +98,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 finish();
             }
         }));
-
-        floatingBtn = (FloatingActionButton) findViewById(R.id.floatingBtn);
-        floatingBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                new TranslateDialog().show(getFragmentManager(),null);
-            }
-        });
-        floatingBtn.hide();
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -121,7 +123,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             name="worldnews";
             title = "Hot News";
             titleText.setText(title);
-            floatingBtn.show();
+            enableFloatingActionButton(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new TranslateDialog().show(getFragmentManager(),null);
+                }
+            },true);
         }
 
         List<Fragment> fragments = new ArrayList<Fragment>();
@@ -180,10 +187,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onPageScrollStateChanged(int state) {}
         });
-        //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
-        Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
-        startService(backgroundService) ;
     }
+
     private void createFragment(String url, String title,String name, List<Fragment> fragments){
         ArticleFragment af = new ArticleFragment();
         Bundle args = new Bundle();
@@ -284,6 +289,48 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }
         }
+    }
+    private void checkAppVersion(){
+        AppConfigService.checkVersion(new HttpRequestListener() {
+            @Override
+            public void onRecievedData(Object data, ErrorCode errorCode) {
+                try {
+                    if(data == null || data.toString().isEmpty())
+                        return;
+                    final JSONObject result = new JSONObject(data.toString());
+                    if (result.has("version") && !AppConfigService.CLIENT_VERSION.equals(result.getString("version"))) {
+                        if(result.getBoolean("forceUpdate")){
+                            UpdateDialog ud = new UpdateDialog();
+                            ud.setUpateText(result.getString("desc"));
+                            ud.show(getFragmentManager(),null);
+                        }else{
+                            final ViewGroup notifyZone = (ViewGroup) findViewById(R.id.notifyZone);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    notifyZone.removeAllViews();
+                                    android.view.View notifyContent = getLayoutInflater().inflate(R.layout.notify_layout, notifyZone);
+                                    TextView text = (TextView) notifyContent.findViewById(R.id.notifyInfo);
+                                    try {
+                                        text.setText(result.getString("desc"));
+                                        text.setOnClickListener(new android.view.View.OnClickListener() {
+                                            @Override
+                                            public void onClick(android.view.View v) {
+                                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getApplicationContext().getPackageName())));
+                                            }
+                                        });
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
     }
     public void showSettingsAlert(){
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getApplicationContext());

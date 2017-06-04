@@ -17,6 +17,7 @@ import com.webstore.webstore.entity.UserActivity;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -46,13 +47,16 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
     public ArticleViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         System.out.println(">>>>>>>>>>>>>>>>>>>>>onCreateViewHolder " + i);
         ArticleViewHolder holder = null;
+        /*
         if(randomGenerator.nextInt(10)%2 == 0 && supportWideLayout==true){
             View view  = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.article_wide_layout, viewGroup, false);
             holder = new ArticleViewHolder(view,true);
         }else{
             View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.article_layout, viewGroup, false);
             holder = new ArticleViewHolder(view,false);
-        }
+        }*/
+        View view  = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.article_container, viewGroup, false);
+        holder = new ArticleViewHolder(view,true);
         return holder;
     }
 
@@ -67,6 +71,19 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
                 ActivityLogService.getInstance().logUserActivity(new UserActivity("AppConfigService.getWebsiteinfo","ERROR",e.getMessage()));
             }
         Article article = getArticles().get(i);
+        ViewGroup viewGroup =  (ViewGroup)articleViewHolder.view.findViewById(R.id.articleContainer);
+        View view = null;
+        viewGroup.removeAllViews();
+
+        if(AppConfigService.isGoodImageWebsite(article.getFromWebSite()) && ( (article.getShotDesc()!=null && !article.getShotDesc().isEmpty()) || article.getTitle().length() > 100)) {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.article_wide_layout, viewGroup, true);
+            articleViewHolder.wideImage=true;
+        }else{
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.article_layout, viewGroup, true);
+            articleViewHolder.wideImage=false;
+        }
+
+        articleViewHolder.initUI(view);
         if(websiteinfoMap != null && websiteinfoMap.containsKey(article.getFromWebSite()) && !websiteinfoMap.get(article.getFromWebSite()).getIcon().isEmpty()){
             Picasso.with(context).load(websiteinfoMap.get(article.getFromWebSite()).getIcon()).placeholder(R.drawable.photos_icon).resize(80, 60).into(articleViewHolder.ownerAvatar);
         }else{
