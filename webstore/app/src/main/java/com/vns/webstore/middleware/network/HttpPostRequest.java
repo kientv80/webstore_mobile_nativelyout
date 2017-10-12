@@ -27,6 +27,7 @@ public class HttpPostRequest extends AsyncTask {
         HttpURLConnection httpURLConnection = null;
         URL url = null;
         StringBuilder result = new StringBuilder();
+        ErrorCode errorCode = new ErrorCode(ErrorCode.ERROR_CODE.SUCCESSED,"Successed");
         try {
             url = new URL(urlString);
             httpURLConnection = (HttpURLConnection)url.openConnection();
@@ -50,14 +51,17 @@ public class HttpPostRequest extends AsyncTask {
             while ((line = br.readLine()) != null) {
                 result.append(line);
             }
-            if(callback != null)
-                callback.onRecievedData(result.toString(), null);
+
         }catch (Exception ex){
             ex.printStackTrace();
+            errorCode = new ErrorCode(ErrorCode.ERROR_CODE.EXCEPTION,"Failed");
         }finally {
             if(httpURLConnection != null)
                 httpURLConnection.disconnect();
 
+        }
+        if(callback != null) {
+            callback.onRecievedData(result.toString(), errorCode);
         }
         return result;
     }

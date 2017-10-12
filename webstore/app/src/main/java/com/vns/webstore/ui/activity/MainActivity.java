@@ -48,6 +48,7 @@ import com.vns.webstore.ui.fragment.CategoryFragment;
 import com.webstore.webstore.R;
 import com.webstore.webstore.entity.UserActivity;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,11 +58,12 @@ import java.util.List;
 /**
  * Created by LAP10572-local on 8/26/2016.
  */
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HttpRequestListener{
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, HttpRequestListener {
     ViewPager viewPager = null;
     long pausedTime;
 
     RecyclerView articlesListingView;
+
     //List<ViewPagerInfo> viewPagerInfos = new ArrayList<>();
     //ProgressBar progressBar;
     @Override
@@ -72,28 +74,28 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         checkAppVersion();
         //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
         Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
-        startService(backgroundService) ;
+        startService(backgroundService);
     }
 
     private void loadUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ImageButton vnlag = (ImageButton)findViewById(R.id.vnflag);
-        vnlag.setOnClickListener((new View.OnClickListener(){
+        ImageButton vnlag = (ImageButton) findViewById(R.id.vnflag);
+        vnlag.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocalStorageHelper.saveToFile("selectworldnews","false");
-                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                LocalStorageHelper.saveToFile("selectworldnews", "false");
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 finish();
             }
         }));
-        ImageButton uslag = (ImageButton)findViewById(R.id.usflag);
-        uslag.setOnClickListener((new View.OnClickListener(){
+        ImageButton uslag = (ImageButton) findViewById(R.id.usflag);
+        uslag.setOnClickListener((new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LocalStorageHelper.saveToFile("selectworldnews","true");
-                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                LocalStorageHelper.saveToFile("selectworldnews", "true");
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -108,7 +110,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         navigationView.setNavigationItemSelectedListener(this);
         //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ArticleLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
         //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ListLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
-        TextView titleText = (TextView)findViewById(R.id.title);
+        TextView titleText = (TextView) findViewById(R.id.title);
 
         CategoryFragment categoryFragment = new CategoryFragment();
         String url = "http://360hay.com/mobile/article/tintuc";
@@ -116,25 +118,25 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         String catetitle = "Danh Mục";
         String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
         String name = "tintuc";
-        if(worldNews != null && "true".equals(worldNews)){
+        if (worldNews != null && "true".equals(worldNews)) {
             url = "http://360hay.com/mobile/article/worldnews";
             categoryFragment.setWorldNews(true);
             catetitle = "Categories";
-            name="worldnews";
+            name = "worldnews";
             title = "Hot News";
             titleText.setText(title);
             enableFloatingActionButton(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    new TranslateDialog().show(getFragmentManager(),null);
+                    new TranslateDialog().show(getFragmentManager(), null);
                 }
-            },true);
+            }, true);
         }
 
         List<Fragment> fragments = new ArrayList<Fragment>();
-        createFragment(url,title,name,fragments);
+        createFragment(url, title, name, fragments);
         Bundle args = new Bundle();
-        args.putString("title",catetitle);
+        args.putString("title", catetitle);
         categoryFragment.setArguments(args);
         fragments.add(categoryFragment);
         categoryFragment.setOnClickListener(new ClickListener() {
@@ -142,18 +144,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onClick(Object data) {
                 JSONObject jsonObject = (JSONObject) data;
                 try {
-                    ActivityLogService.getInstance().logUserActivity(new UserActivity("open_category","CATEGORY",jsonObject.toString()));
-                    if(!jsonObject.getBoolean("openLink")){
-                        PagerAdapter pagerAdapter = (PagerAdapter)viewPager.getAdapter();
-                        final ArticleFragment af =  (ArticleFragment)pagerAdapter.getItem(0);
-                        af.setUrl("http://360hay.com/mobile/article/"+jsonObject.getString("cateName"));
+                    ActivityLogService.getInstance().logUserActivity(new UserActivity("open_category", "CATEGORY", jsonObject.toString()));
+                    if (!jsonObject.getBoolean("openLink")) {
+                        PagerAdapter pagerAdapter = (PagerAdapter) viewPager.getAdapter();
+                        final ArticleFragment af = (ArticleFragment) pagerAdapter.getItem(0);
+                        af.setUrl("http://360hay.com/mobile/article/" + jsonObject.getString("cateName"));
                         af.setTitle(jsonObject.getString("cateLabel"));
                         af.setName(jsonObject.getString("cateName"));
                         viewPager.setCurrentItem(0);
                         af.reloadArticle();
-                    }else{
-                        Intent intent = new Intent(getApplicationContext(),OpenArticleActivity.class);
-                        intent.putExtra("url",jsonObject.getString("url"));
+                    } else {
+                        Intent intent = new Intent(getApplicationContext(), OpenArticleActivity.class);
+                        intent.putExtra("url", jsonObject.getString("url"));
                         startActivity(intent);
                     }
 
@@ -164,66 +166,71 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
 
-        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(),fragments);
-        viewPager = (ViewPager)findViewById(R.id.viewpager);
+        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
         viewPager.setAdapter(pagerAdapter);
         final TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
             @Override
             public void onPageSelected(int position) {
-                if(position == 0) {
+                if (position == 0) {
                     PagerAdapter pagerAdapter = (PagerAdapter) viewPager.getAdapter();
                     ArticleFragment af = (ArticleFragment) pagerAdapter.getItem(0);
-                    if(af.getTitle() != null && !af.getTitle().isEmpty()) {
+                    if (af.getTitle() != null && !af.getTitle().isEmpty()) {
                         tabLayout.getTabAt(0).setText(af.getTitle());
                         TextView title = (TextView) findViewById(R.id.title);
                         title.setText(af.getTitle());
                     }
                 }
             }
+
             @Override
-            public void onPageScrollStateChanged(int state) {}
+            public void onPageScrollStateChanged(int state) {
+            }
         });
     }
 
-    private void createFragment(String url, String title,String name, List<Fragment> fragments){
+    private void createFragment(String url, String title, String name, List<Fragment> fragments) {
         ArticleFragment af = new ArticleFragment();
         Bundle args = new Bundle();
-        args.putString("title",title);
+        args.putString("title", title);
         af.setArguments(args);
         af.setUrl(url);
         af.setName(name);
         fragments.add(af);
     }
-    private void callback(Object data){
-        if(data != null) {
-            List<NotifyInfo> newNotifyInfoList =  JSONHelper.toObjects(data.toString(),NotifyInfo.class);
+
+    private void callback(Object data) {
+        if (data != null) {
+            List<NotifyInfo> newNotifyInfoList = JSONHelper.toObjects(data.toString(), NotifyInfo.class);
             final List<Article> articles = new ArrayList<>();
-            for(NotifyInfo n: newNotifyInfoList){
+            for (NotifyInfo n : newNotifyInfoList) {
                 Article article = new Article();
                 article.setTitle(n.getTitle());
                 article.setImageUrl(n.getThemeUrl());
                 article.setWebsiteAvatar(n.getThemeUrl());
-                article.setFromWebSite(n.getFrom()+"\n("+n.getDate()+")");
+                article.setFromWebSite(n.getFrom() + "\n(" + n.getDate() + ")");
                 articles.add(article);
             }
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    try{
+                    try {
                         ArticleFragment af = new ArticleFragment();
                         af.setArticleList(articles);
                         List<Fragment> fragments = new ArrayList<Fragment>();
                         fragments.add(af);
-                        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(),fragments);
-                        viewPager = (ViewPager)findViewById(R.id.viewpager);
+                        PagerAdapter pagerAdapter = new PagerAdapter(getSupportFragmentManager(), fragments);
+                        viewPager = (ViewPager) findViewById(R.id.viewpager);
                         viewPager.setAdapter(pagerAdapter);
                         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
                         tabLayout.setupWithViewPager(viewPager);
-                    }catch (Exception ex){
+                    } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                 }
@@ -241,13 +248,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     protected void onResume() {
-        if(pausedTime > 0 && (System.currentTimeMillis()-pausedTime) > 10*60*1000){
+        if (pausedTime > 0 && (System.currentTimeMillis() - pausedTime) > 10 * 60 * 1000) {
             //Reload
             System.out.println("MainActivity  reload pausedTime");
             super.onResume();
             updateViewPager();
             viewPager.setCurrentItem(0);
-        }else{
+        } else {
             super.onResume();
         }
     }
@@ -257,7 +264,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onDestroy() {
         System.out.println("MainActivity  onDestroy");
         viewPager = null;
-        LocalStorageHelper.saveToFile("lasttimeupdate",System.currentTimeMillis() + "");
+        LocalStorageHelper.saveToFile("lasttimeupdate", System.currentTimeMillis() + "");
         ActivityLogService.getInstance().submitLogToServer();
         super.onDestroy();
     }
@@ -266,44 +273,65 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_inbox) {
-            Intent intent = new Intent(getApplicationContext(),NotificationActivity.class);
+            Intent intent = new Intent(getApplicationContext(), NotificationActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_favorite_cates) {
+
+            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_cate_settings", new HttpRequestListener() {
+                @Override
+                public void onRecievedData(Object data, ErrorCode errorCode) {
+                    if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
+                        try {
+                            JSONObject settings = new JSONObject(data.toString());
+                            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                            intent.putExtra("settings", settings.toString());
+                            startActivity(intent);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, null);
+
         }
         return true;
     }
-    private void updateViewPager(){
-        PagerAdapter p = ((PagerAdapter)viewPager.getAdapter());
+
+    private void updateViewPager() {
+        PagerAdapter p = ((PagerAdapter) viewPager.getAdapter());
         //p.setWebPages(pages);
         viewPager.setAdapter(p);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(viewPager);
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case LocationService.MY_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Location location = LocationService.getLocation(this,getApplicationContext());
+                    Location location = LocationService.getLocation(this, getApplicationContext());
                     LocationService.saveLocation(location);
                 }
             }
         }
     }
-    private void checkAppVersion(){
+
+    private void checkAppVersion() {
         AppConfigService.checkVersion(new HttpRequestListener() {
             @Override
             public void onRecievedData(Object data, ErrorCode errorCode) {
                 try {
-                    if(data == null || data.toString().isEmpty())
+                    if (data == null || data.toString().isEmpty())
                         return;
                     final JSONObject result = new JSONObject(data.toString());
                     if (result.has("version") && !AppConfigService.CLIENT_VERSION.equals(result.getString("version"))) {
-                        if(result.getBoolean("forceUpdate")){
+                        if (result.getBoolean("forceUpdate")) {
                             UpdateDialog ud = new UpdateDialog();
                             ud.setUpateText(result.getString("desc"));
-                            ud.show(getFragmentManager(),null);
-                        }else{
+                            ud.show(getFragmentManager(), null);
+                        } else {
                             final ViewGroup notifyZone = (ViewGroup) findViewById(R.id.notifyZone);
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -332,7 +360,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
     }
-    public void showSettingsAlert(){
+
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getApplicationContext());
 
         // Setting Dialog Title
@@ -346,7 +375,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
+            public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 getApplicationContext().startActivity(intent);
             }

@@ -27,7 +27,7 @@ public class HttpClientHelper {
         }
         Profile p = ProfileService.getProfile();
         if(p != null)
-            urlInfo+="&uid=" + p.getId();
+                urlInfo+="&uid=" + p.getId();
 
         return url + urlInfo;
     }

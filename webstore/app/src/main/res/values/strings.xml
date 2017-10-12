@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Tin Mới</string>
+    <string name="nav_favorite_cates">Chủ Đề Yêu Thích</string>
+
     <string name="nav_news">Tin Tức</string>
     <string name="news">Tin Tức</string>
     <string name="nav_entertain">Giải Trí</string>
@@ -45,5 +47,8 @@
     <string name="nav_notification">Thông Báo Mới</string>
     <string name="translate">Translate</string>
     <string name="cancel">Cancel</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="save_settings_successfull">Saved</string>
+    <string name="save_settings_failed">Save failed.</string>
 
 </resources>

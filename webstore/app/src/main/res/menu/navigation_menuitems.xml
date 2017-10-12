@@ -6,6 +6,11 @@
             android:id="@+id/nav_inbox"
             android:icon="@drawable/ic_mail_outline_black_24dp"
             android:title="@string/nav_notification"/>
+
+        <item
+            android:id="@+id/nav_favorite_cates"
+            android:icon="@drawable/ic_favorite_border_white_24dp"
+            android:title="@string/nav_favorite_cates"/>
         <!--
 
                 <item
