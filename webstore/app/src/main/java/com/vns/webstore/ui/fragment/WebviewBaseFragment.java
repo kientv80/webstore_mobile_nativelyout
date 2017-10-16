@@ -3,6 +3,7 @@ package com.vns.webstore.ui.fragment;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.Build;
@@ -60,7 +61,7 @@ public class WebviewBaseFragment extends Fragment {
                             startActivity(intent);
                         }
                     }else{
-                        view.loadDataWithBaseURL("file:///android_asset/style.css", "Không có kết nối internet. Vui lòng kết nối Internet và thử lại sau.", MYTYPE, UTF_8, "");
+                        view.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");
                     }
 
                     return true;

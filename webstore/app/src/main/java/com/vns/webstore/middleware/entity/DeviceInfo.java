@@ -1,5 +1,8 @@
 package com.vns.webstore.middleware.entity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.UUID;
 
 /**
@@ -101,5 +104,19 @@ public class DeviceInfo {
 
     public void setPhoneType(int phoneType) {
         this.phoneType = phoneType;
+    }
+
+    public JSONObject getDeviceInfo() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("deviceId",deviceId);
+        jsonObject.put("simSerialNo",simSerialNo);
+        jsonObject.put("deviceSoftwareVersion",deviceSoftwareVersion);
+        jsonObject.put("networkOperatorName",networkOperatorName);
+        jsonObject.put("simOperatorName",simOperatorName);
+        jsonObject.put("line1Number",line1Number);
+        jsonObject.put("subscriberId",subscriberId);
+        jsonObject.put("networkType",networkType);
+        jsonObject.put("phoneType",phoneType);
+        return jsonObject;
     }
 }

@@ -21,7 +21,7 @@ public class TemplateService {
                         "\t<p style='padding-left:10px;'>%s</p>\n" +
                         "<p style='background-color:#e9ebee;'>" +
                         "<img src='file:///android_asset/loading.gif' style='padding:8px;'>" +
-                        "<span> %s </span>" +
+                        "<span style='margin-bottom:10px;'> %s </span>" +
                         "</p>" +
                         "</div>");
         return template.toString();

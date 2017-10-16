@@ -26,10 +26,12 @@ import com.vns.webstore.middleware.entity.NotifyInfo;
 import com.vns.webstore.middleware.entity.WebPage;
 import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.ErrorCode;
+import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.ProfileService;
+import com.vns.webstore.middleware.service.SettingsService;
 import com.vns.webstore.middleware.service.TemplateService;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.openapi.CoreOpenAPIs;
@@ -198,6 +200,8 @@ public class BaseActivity extends AppCompatActivity {
         try {
             AppConfigService.getWebsiteinfo();//Load webinfo
             ProfileService.getProfile(getApplicationContext());
+            HttpClientHelper.context = getApplicationContext();
+            SettingsService.getInstance();
         } catch (JSONException e) {
             e.printStackTrace();
         }

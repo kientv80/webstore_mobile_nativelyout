@@ -1,6 +1,7 @@
 package com.vns.webstore.ui.fragment;
 
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,7 +35,7 @@ public class WebviewFragment extends WebviewBaseFragment {
             else if (url != null)
                 webView.loadUrl(url);
         }else{
-            webView.loadDataWithBaseURL("file:///android_asset/style.css", "Không có kết nối internet. Vui lòng kết nối Internet và thử lại sau.", MYTYPE, UTF_8, "");
+            webView.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");
         }
         return viewGroup;
     }

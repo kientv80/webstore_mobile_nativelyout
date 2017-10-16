@@ -1,8 +1,10 @@
 package com.vns.webstore.middleware.network;
 
+import android.content.res.Resources;
 import android.os.AsyncTask;
 
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
+import com.webstore.webstore.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,13 +53,14 @@ public class HttpGetRequest extends AsyncTask {
             }catch (Exception ex){
                 System.out.println("ERROR to access " + urlString);
                 ex.printStackTrace();
-                errorCode = new ErrorCode(ErrorCode.ERROR_CODE.CONNECTION_TIMEOUT, "Can not access service, please check network connection(Wifi, 3G).");
+
+                errorCode = new ErrorCode(ErrorCode.ERROR_CODE.CONNECTION_TIMEOUT, HttpClientHelper.context.getResources().getString(R.string.error_access_service));
             }finally {
                 if(httpURLConnection != null)
                     httpURLConnection.disconnect();
             }
         }else{
-            errorCode = new ErrorCode(ErrorCode.ERROR_CODE.NO_CONNECTION, "No connection, please check network connection Wifi, 3G");
+            errorCode = new ErrorCode(ErrorCode.ERROR_CODE.NO_CONNECTION,HttpClientHelper.context.getResources().getString(R.string.error_noconnection));
         }
 
         if(callback != null) {

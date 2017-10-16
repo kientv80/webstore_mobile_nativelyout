@@ -36,7 +36,9 @@ import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.LocationService;
 import com.vns.webstore.middleware.service.ProfileService;
+import com.vns.webstore.middleware.service.SettingsService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
+import com.vns.webstore.middleware.utils.DeviceManager;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.middleware.worker.WebstoreBackgroundService;
 import com.vns.webstore.ui.adapter.ClickListener;
@@ -75,6 +77,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
         Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
         startService(backgroundService);
+        try {
+            DeviceManager.getIniqueIdForThisDevice(getApplicationContext());
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     private void loadUI() {
@@ -113,18 +120,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         TextView titleText = (TextView) findViewById(R.id.title);
 
         CategoryFragment categoryFragment = new CategoryFragment();
-        String url = "http://360hay.com/mobile/article/tintuc";
+        String url = "http://360hay.com/mobile/article_v2/tintuc";
         String title = getResources().getString(R.string.news);
-        String catetitle = "Danh Mục";
+        String catetitle = getResources().getString(R.string.category);
         String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
         String name = "tintuc";
         if (worldNews != null && "true".equals(worldNews)) {
             url = "http://360hay.com/mobile/article/worldnews";
             categoryFragment.setWorldNews(true);
-            catetitle = "Categories";
             name = "worldnews";
-            title = "Hot News";
             titleText.setText(title);
+            enableFloatingActionButton(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new TranslateDialog().show(getFragmentManager(), null);
+                }
+            }, true);
+        }else if(SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)){
             enableFloatingActionButton(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -257,6 +269,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             super.onResume();
         }
+        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
+
+        if("true".equals(worldNews) || SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)){
+            enableFloatingActionButton(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new TranslateDialog().show(getFragmentManager(), null);
+                }
+            }, true);
+        }else{
+            enableFloatingActionButton(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new TranslateDialog().show(getFragmentManager(), null);
+                }
+            }, false);
+        }
     }
 
 
@@ -276,8 +305,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             Intent intent = new Intent(getApplicationContext(), NotificationActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_favorite_cates) {
-
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_cate_settings", new HttpRequestListener() {
+            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_cates", new HttpRequestListener() {
                 @Override
                 public void onRecievedData(Object data, ErrorCode errorCode) {
                     if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
@@ -293,7 +321,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }, null);
 
-        }
+        } else if (id == R.id.nav_settings) {
+                HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=settings", new HttpRequestListener() {
+            @Override
+            public void onRecievedData(Object data, ErrorCode errorCode) {
+                if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
+                    try {
+                        JSONObject settings = new JSONObject(data.toString());
+                        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        intent.putExtra("settings", settings.toString());
+                        startActivity(intent);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, null);
+
+    }
         return true;
     }
 

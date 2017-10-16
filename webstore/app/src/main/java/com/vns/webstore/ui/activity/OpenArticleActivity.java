@@ -1,6 +1,7 @@
 package com.vns.webstore.ui.activity;
 
 import android.app.ProgressDialog;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -18,6 +19,7 @@ import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 
 import com.vns.webstore.middleware.network.ConnectionManager;
+import com.vns.webstore.middleware.service.SettingsService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.ui.dialog.TranslateDialog;
 import com.webstore.webstore.R;
@@ -44,7 +46,7 @@ public class OpenArticleActivity extends BaseActivity {
             }
         });
         String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
-        if(worldNews != null && "true".equals(worldNews)) {
+        if("true".equals(worldNews) || SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)) {
             enableFloatingActionButton(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -82,7 +84,7 @@ public class OpenArticleActivity extends BaseActivity {
                     if(ConnectionManager.isNetworkAvailable()){
                         view.loadUrl(url);
                     }else{
-                        view.loadDataWithBaseURL("file:///android_asset/style.css", "Không có kết nối internet. Vui lòng kết nối Internet và thử lại sau.", MYTYPE, UTF_8, "");;
+                        view.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");;
                     }
                     return true;
                 }
@@ -112,7 +114,7 @@ public class OpenArticleActivity extends BaseActivity {
             String currentUrl = getIntent().getStringExtra("url");
             wvDetail.loadUrl(currentUrl);
         }else{
-            wvDetailTmp.loadDataWithBaseURL("file:///android_asset/style.css", "Không có kết nối internet. Vui lòng kết nối Internet và thử lại sau.", MYTYPE, UTF_8, "");;
+            wvDetailTmp.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");;
             wvDetailTmp.setVisibility(View.VISIBLE);
         }
 

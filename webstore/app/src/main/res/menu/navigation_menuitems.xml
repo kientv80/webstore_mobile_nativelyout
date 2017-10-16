@@ -11,6 +11,10 @@
             android:id="@+id/nav_favorite_cates"
             android:icon="@drawable/ic_favorite_border_white_24dp"
             android:title="@string/nav_favorite_cates"/>
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/nav_setting"/>
         <!--
 
                 <item

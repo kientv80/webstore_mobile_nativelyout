@@ -1,11 +1,13 @@
 package com.vns.webstore.ui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Pair;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -20,6 +22,7 @@ import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
+import com.vns.webstore.middleware.service.SettingsService;
 import com.webstore.webstore.R;
 import com.webstore.webstore.entity.UserActivity;
 
@@ -40,6 +43,11 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        initUI();
+
+    }
+
+    private void initUI() {
         GridLayout settingContainer = (GridLayout) findViewById(R.id.content_settings);
         settingContainer.removeAllViews();
         String settings = getIntent().getStringExtra("settings");
@@ -52,7 +60,6 @@ public class SettingsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                finish();
             }
         });
         try {
@@ -85,7 +92,6 @@ public class SettingsActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
     @Override
@@ -136,7 +142,11 @@ public class SettingsActivity extends AppCompatActivity {
 
                 }
             }, params);
-            System.out.println(settings.toString());
+            SettingsService.getInstance().loadSettings();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+            finish();
+
         } catch (Exception ex) {
             ex.printStackTrace();
             ActivityLogService.getInstance().logUserActivity(new UserActivity("SAVE_CATE_SETTING", "SETTING", settings.toString()));
@@ -150,5 +160,11 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initUI();
     }
 }

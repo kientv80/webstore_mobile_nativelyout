@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by root on 08/02/2017.
@@ -60,7 +61,7 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
         if(worldNews)
             type = "worldnews";
 
-        String categories = LocalStorageHelper.getFromFile("categories"+type);
+        String categories = LocalStorageHelper.getFromFile("categories"+type+ Locale.getDefault());
         if(categories != null && !categories.isEmpty()){
             JSONObject cates = new JSONObject(categories);
             if(cates.has("data")) {
@@ -68,11 +69,11 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
                 if(cateData.has("categories"))
                     renderCategories(cateData.getString("categories"));
                 if (((System.currentTimeMillis() - cates.getLong("cachedTime")) > 30 * 60 * 1000)) {
-                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type=" + type, null, "categories"+type);
+                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type=" + type, null, "categories"+type+ Locale.getDefault());
                 }
             }
         } else {
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type="+ type, this,"categories"+type);
+            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type="+ type, this,"categories"+type+ Locale.getDefault());
         }
 
     }

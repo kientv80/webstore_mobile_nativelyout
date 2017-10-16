@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager;
 import com.vns.webstore.middleware.entity.DeviceInfo;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -19,21 +20,22 @@ import java.util.UUID;
 public class DeviceManager {
     protected static final String PREFS_FILE = "device_id.xml";
     protected static final String PREFS_DEVICE_ID = "device_id";
-    protected volatile static DeviceInfo deviceInfo;
+    private volatile static DeviceInfo deviceInfo;
 
     public static DeviceInfo getIniqueIdForThisDevice(Context context) {
-        if (deviceInfo == null) {
+        if (getDeviceInfo() == null) {
             synchronized (DeviceManager.class) {
                 UUID uuid = null;
                 TelephonyManager tm = null;
                 try {
+
                     int permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE);
                     if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
                         tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
                     } else {
                         //Ask permission
                     }
-                    if (deviceInfo == null) {
+                    if (getDeviceInfo() == null) {
                         final SharedPreferences prefs = context.getSharedPreferences(PREFS_FILE, 0);
                         final String id = prefs.getString(PREFS_DEVICE_ID, null);
                         if (id != null) {
@@ -67,22 +69,22 @@ public class DeviceManager {
                     uuid = UUID.randomUUID();
                 }
                 if (tm != null) {
-                    deviceInfo = new DeviceInfo(tm.getDeviceId(), tm.getSimSerialNumber());
-                    deviceInfo.setDeviceSoftwareVersion(tm.getDeviceSoftwareVersion());
-                    deviceInfo.setNetworkOperatorName(tm.getNetworkOperatorName());
-                    deviceInfo.setSimOperatorName(tm.getSimOperatorName());
-                    deviceInfo.setLine1Number(tm.getLine1Number());
-                    deviceInfo.setSubscriberId(tm.getSubscriberId());
-                    deviceInfo.setNetworkType(tm.getNetworkType());
-                    deviceInfo.setPhoneType(tm.getPhoneType());
+                    setDeviceInfo(new DeviceInfo(tm.getDeviceId(), tm.getSimSerialNumber()));
+                    getDeviceInfo().setDeviceSoftwareVersion(tm.getDeviceSoftwareVersion());
+                    getDeviceInfo().setNetworkOperatorName(tm.getNetworkOperatorName());
+                    getDeviceInfo().setSimOperatorName(tm.getSimOperatorName());
+                    getDeviceInfo().setLine1Number(tm.getLine1Number());
+                    getDeviceInfo().setSubscriberId(tm.getSubscriberId());
+                    getDeviceInfo().setNetworkType(tm.getNetworkType());
+                    getDeviceInfo().setPhoneType(tm.getPhoneType());
                 } else {
-                    deviceInfo = new DeviceInfo();
+                    setDeviceInfo(new DeviceInfo());
                 }
-                deviceInfo.setUuid(uuid);
+                getDeviceInfo().setUuid(uuid);
 
             }
         }
-        return deviceInfo;
+        return getDeviceInfo();
     }
 
     public static DeviceInfo getDeviceInfo(Context context) {
@@ -95,5 +97,13 @@ public class DeviceManager {
         DeviceInfo dv = new DeviceInfo(deviceId, simSerialNo);
         return dv;
 
+    }
+
+    public static DeviceInfo getDeviceInfo() {
+        return deviceInfo;
+    }
+
+    public static void setDeviceInfo(DeviceInfo deviceInfo) {
+        DeviceManager.deviceInfo = deviceInfo;
     }
 }
