@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:text="@string/app_name" />
-
+<!--
                 <ImageButton
                     android:id="@+id/vnflag"
                     android:layout_width="45dip"
@@ -51,6 +51,7 @@
                     android:src="@drawable/usflag"
                     android:background="@drawable/selector"
                     />
+-->
             </GridLayout>
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>

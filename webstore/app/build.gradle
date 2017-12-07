@@ -13,7 +13,7 @@ android {
     }
     buildTypes {
         webstore {
-            debuggable true
+            debuggable false
             versionNameSuffix '1.0'
         }
     }

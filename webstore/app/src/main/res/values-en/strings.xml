@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="msg.web.loading">Loading ... </string>
-    <string name="app_name">Hot News</string>
+    <string name="app_name">GlobalNews</string>
     <string name="title_notify">New Notifications</string>
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>

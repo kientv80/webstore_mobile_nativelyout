@@ -1,6 +1,7 @@
 package com.vns.webstore.ui.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -39,20 +40,24 @@ public class OpenArticleActivity extends BaseActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         ImageButton btnBack = (ImageButton) findViewById(R.id.btn_back);
+        final String currentUrl = getIntent().getStringExtra("url");
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
-        if("true".equals(worldNews) || SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)) {
+
+
+        if(!"https://translate.google.com/m/translate".equals(currentUrl)) {
             enableFloatingActionButton(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    TranslateDialog d = new TranslateDialog();
-                    d.show(getFragmentManager(), null);
-
+                    Intent intent = new Intent(getApplicationContext(), OpenArticleActivity.class);
+                    intent.putExtra("url", "https://translate.google.com/m/translate");
+                    intent.putExtra("articleHtml", "Loading google translate ...");
+                    intent.putExtra("article", false);
+                    startActivity(intent);
                 }
             }, true);
         }
@@ -111,7 +116,7 @@ public class OpenArticleActivity extends BaseActivity {
                     return false;
                 }
             });
-            String currentUrl = getIntent().getStringExtra("url");
+
             wvDetail.loadUrl(currentUrl);
         }else{
             wvDetailTmp.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");;

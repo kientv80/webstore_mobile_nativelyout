@@ -87,26 +87,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void loadUI() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ImageButton vnlag = (ImageButton) findViewById(R.id.vnflag);
-        vnlag.setOnClickListener((new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LocalStorageHelper.saveToFile("selectworldnews", "false");
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }));
-        ImageButton uslag = (ImageButton) findViewById(R.id.usflag);
-        uslag.setOnClickListener((new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LocalStorageHelper.saveToFile("selectworldnews", "true");
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        }));
 
         final DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -115,35 +95,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         init();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ArticleLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
-        //viewPagerInfos.add(new ViewPagerInfo(ViewPagerInfo.ViewType.ListLayout,"http://360hay.com/mobile/article/tintuc","Tin Tuc"));
         TextView titleText = (TextView) findViewById(R.id.title);
 
         CategoryFragment categoryFragment = new CategoryFragment();
-        String url = "http://360hay.com/mobile/article_v2/tintuc";
+        String url = "http://360hay.com/mobile/article/HotNews";
         String title = getResources().getString(R.string.news);
         String catetitle = getResources().getString(R.string.category);
-        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
         String name = "tintuc";
-        if (worldNews != null && "true".equals(worldNews)) {
-            url = "http://360hay.com/mobile/article/worldnews";
-            categoryFragment.setWorldNews(true);
-            name = "worldnews";
-            titleText.setText(title);
-            enableFloatingActionButton(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new TranslateDialog().show(getFragmentManager(), null);
-                }
-            }, true);
-        }else if(SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)){
-            enableFloatingActionButton(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new TranslateDialog().show(getFragmentManager(), null);
-                }
-            }, true);
-        }
+
+        enableFloatingActionButton(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), OpenArticleActivity.class);
+                intent.putExtra("url", "https://translate.google.com/m/translate");
+                intent.putExtra("articleHtml", "Loading google translate ...");
+                intent.putExtra("article", false);
+                startActivity(intent);
+            }
+        }, true);
 
         List<Fragment> fragments = new ArrayList<Fragment>();
         createFragment(url, title, name, fragments);
@@ -269,23 +238,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             super.onResume();
         }
-        String worldNews = LocalStorageHelper.getFromFile("selectworldnews");
 
-        if("true".equals(worldNews) || SettingsService.getInstance().getSettings().containsKey("mixVNandWorld") && SettingsService.getInstance().getSettings().get("mixVNandWorld").equals(true)){
-            enableFloatingActionButton(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new TranslateDialog().show(getFragmentManager(), null);
-                }
-            }, true);
-        }else{
-            enableFloatingActionButton(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new TranslateDialog().show(getFragmentManager(), null);
-                }
-            }, false);
-        }
     }
 
 
@@ -322,7 +275,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }, null);
 
         } else if (id == R.id.nav_settings) {
-                HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=settings", new HttpRequestListener() {
+                HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_countries", new HttpRequestListener() {
             @Override
             public void onRecievedData(Object data, ErrorCode errorCode) {
                 if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {

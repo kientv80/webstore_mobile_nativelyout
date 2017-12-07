@@ -96,6 +96,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
         articleViewHolder.setUrl(article.getUrl());
         articleViewHolder.setArticleHtml(renderArticle(article));
         articleViewHolder.setArticle(article);
+        articleViewHolder.getType().setText(article.getType());
         if(articleViewHolder.articleDesc != null && article.getShotDesc() != null){
             articleViewHolder.articleDesc.setText(article.getShotDesc());
         }
