@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="msg.web.loading">Loading ... </string>
-    <string name="app_name">GlobalNews</string>
+    <string name="app_name">GlobalNews Index</string>
     <string name="title_notify">New Notifications</string>
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
@@ -16,9 +16,13 @@
     <string name="error_access_service">Can not access service, please check network connection(Wifi, 3G).</string>
     <string name="category">Categories</string>
     <string name="news">Hot News</string>
-    <string name="nav_setting">Settings</string>
-
+    <string name="nav_setting">News from Countries</string>
+    <string name="nav_language">News in Languages</string>
     <string name="title_activity_web_view">WebViewActivity</string>
     <string name="title_activity_open_article">OpenArticleActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="facebook_app_id">1658222504229501</string>
+    <string name="fb_login_protocol_scheme">fb1658222504229501</string>
+    <string name="nav_profile_name">Login</string>
+
 </resources>

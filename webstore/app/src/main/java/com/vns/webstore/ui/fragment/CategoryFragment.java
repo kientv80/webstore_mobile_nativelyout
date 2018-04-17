@@ -14,6 +14,7 @@ import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
+import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.ui.adapter.CategoryAdapter;
@@ -58,22 +59,26 @@ public class CategoryFragment extends Fragment implements HttpRequestListener{
 
     private void loadCategories(ViewGroup container) throws JSONException {
         String type = "";
-        if(worldNews)
-            type = "worldnews";
 
-        String categories = LocalStorageHelper.getFromFile("categories"+type+ Locale.getDefault());
+        String categories = LocalStorageHelper.getFromFile("categories"+Locale.getDefault());
         if(categories != null && !categories.isEmpty()){
-            JSONObject cates = new JSONObject(categories);
-            if(cates.has("data")) {
-                JSONObject cateData = new JSONObject(cates.getString("data"));
-                if(cateData.has("categories"))
-                    renderCategories(cateData.getString("categories"));
-                if (((System.currentTimeMillis() - cates.getLong("cachedTime")) > 30 * 60 * 1000)) {
-                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type=" + type, null, "categories"+type+ Locale.getDefault());
+            try {
+                JSONObject cates = new JSONObject(categories);
+                if (cates.has("data")) {
+                    JSONObject cateData = new JSONObject(cates.getString("data"));
+                    if (cateData.has("categories"))
+                        renderCategories(cateData.getString("categories"));
+                    if (((System.currentTimeMillis() - cates.getLong("cachedTime")) > 30 * 60 * 1000)) {
+                        HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/category?type=" + type, null, "categories" + type + Locale.getDefault());
+                    }
                 }
+            }catch (Exception ex){
+                ex.printStackTrace();
+                LocalStorageHelper.saveToFile("categories"+Locale.getDefault(),"");
+                HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/category?type=" + type, null, "categories" + type + Locale.getDefault());
             }
         } else {
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/category?type="+ type, this,"categories"+type+ Locale.getDefault());
+            HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/category?type="+ type, this,"categories"+type+ Locale.getDefault());
         }
 
     }

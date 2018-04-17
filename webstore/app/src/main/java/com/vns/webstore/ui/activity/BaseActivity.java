@@ -209,11 +209,13 @@ public class BaseActivity extends AppCompatActivity {
 
 
     public void enableFloatingActionButton(android.view.View.OnClickListener listener, boolean visible) {
+
         floatingBtn = (FloatingActionButton) findViewById(R.id.floatingBtn);
         floatingBtn.setOnClickListener(listener);
         if (!visible)
             floatingBtn.hide();
         else
             floatingBtn.show();
+
     }
 }

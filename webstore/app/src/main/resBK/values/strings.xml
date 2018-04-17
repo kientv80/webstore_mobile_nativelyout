@@ -1,0 +1,27 @@
+<resources>
+    <string name="msg.web.loading">Đang tải bài viết ... </string>
+    <string name="app_name">GlobalNews</string>
+    <string name="nav_favorite_cates">Chủ Đề Yêu Thích</string>
+    <string name="news">Tin Tức</string>
+    <string name="title_notify">Thông Báo Mới</string>
+    <string name="navigation_drawer_open">Mở</string>
+    <string name="navigation_drawer_close">Đóng</string>
+    <string name="title_activity_web_view">WebViewActivity</string>
+    <string name="action_settings">Cấu Hình</string>
+
+    <string name="title_activity_open_article">OpenArticleActivity</string>
+
+    <string name="nav_setting">Tin Tức Từ</string>
+    <string name="nav_language">Ngôn Ngữ Tin</string>
+
+    <string name="nav_notification">Thông Báo Mới</string>
+    <string name="translate">Dịch</string>
+    <string name="cancel">Đóng</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="save_settings_successfull">Lưu</string>
+    <string name="save_settings_failed">Lưu không thành công, vui lòng thử lại sau.</string>
+    <string name="error_access_service">Không thể truy cập dịch vu, vui lòng kiểm tra kết nối và thứ lại sau.</string>
+    <string name="error_noconnection">Không có kết nối, vui lòng kiểm tra Wifi,3G.</string>
+    <string name="category">Danh Mục</string>
+
+</resources>

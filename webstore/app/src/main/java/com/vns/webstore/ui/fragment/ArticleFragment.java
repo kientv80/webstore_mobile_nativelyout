@@ -53,10 +53,15 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
     int visibleThreshold = 5;
     private String name;
 
+    int currentIndex = 0;
+
+
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentIndex = 0;
         ViewGroup viewGroup = (ViewGroup) inflater.inflate(R.layout.recyclerview_listing, container, false);
         articlesListingView = (RecyclerView) viewGroup.findViewById(R.id.recyclerview);
         articlesListingView.setHasFixedSize(false);
@@ -84,17 +89,9 @@ public class ArticleFragment extends Fragment implements HttpRequestListener {
         loadArticles(null);
     }
 
-    int currentIndex = 0;
-    int totalArticles = 0;
 
     private void loadMores() {
         if (ConnectionManager.isNetworkAvailable()) {
-            ArticleAdapter adapter = (ArticleAdapter) articlesListingView.getAdapter();
-            if (adapter == null && totalArticles == 0 || totalArticles != adapter.getItemCount()) {
-                totalArticles = adapter.getItemCount();
-            } else {
-                return;
-            }
             currentIndex += 10;
             HttpClientHelper.executeHttpGetRequest(url + "?from=" + currentIndex, this, null);
         }

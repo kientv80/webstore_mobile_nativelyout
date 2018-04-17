@@ -41,7 +41,7 @@ public class WebstoreService {
                 cachedTime = (System.currentTimeMillis()) + "";
             final JSONObject cached = new JSONObject();
             cached.put("cachedTime", cachedTime);
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/getupdate?lasttimeupdate=" + cachedTime, new HttpRequestListener() {
+            HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/getupdate?lasttimeupdate=" + cachedTime, new HttpRequestListener() {
                 @Override
                 public void onRecievedData(Object data, ErrorCode errorCode) {
                     if (data != null) {

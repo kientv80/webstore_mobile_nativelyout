@@ -4,14 +4,12 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -20,42 +18,50 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Pair;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.NotifyInfo;
-import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.service.ActivityLogService;
 import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.LocationService;
-import com.vns.webstore.middleware.service.ProfileService;
-import com.vns.webstore.middleware.service.SettingsService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.middleware.utils.DeviceManager;
 import com.vns.webstore.middleware.utils.JSONHelper;
 import com.vns.webstore.middleware.worker.WebstoreBackgroundService;
 import com.vns.webstore.ui.adapter.ClickListener;
 import com.vns.webstore.ui.adapter.PagerAdapter;
-import com.vns.webstore.ui.dialog.TranslateDialog;
+import com.vns.webstore.ui.dialog.DynamicDialog;
 import com.vns.webstore.ui.dialog.UpdateDialog;
 import com.vns.webstore.ui.fragment.ArticleFragment;
 import com.vns.webstore.ui.fragment.CategoryFragment;
 import com.webstore.webstore.R;
 import com.webstore.webstore.entity.UserActivity;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by LAP10572-local on 8/26/2016.
@@ -65,21 +71,28 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     long pausedTime;
 
     RecyclerView articlesListingView;
+    CallbackManager callbackManager;
+    AccessTokenTracker accessTokenTracker;
+    ProfileTracker profileTracker;
 
     //List<ViewPagerInfo> viewPagerInfos = new ArrayList<>();
     //ProgressBar progressBar;
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
         loadUI();
-        checkAppVersion();
-        //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
-        Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
-        startService(backgroundService);
         try {
+            checkAppVersion();
+            //System.out.println("======================id ="+ProfileService.getProfile(this).getId());
+            Intent backgroundService = new Intent(this, WebstoreBackgroundService.class);
+            startService(backgroundService);
             DeviceManager.getIniqueIdForThisDevice(getApplicationContext());
-        }catch (Exception ex){
+            if(LocalStorageHelper.getFromFile("firstTime")==null){
+                settingNewsLanguage();
+                LocalStorageHelper.saveToFile("firstTime","false");
+            }
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -98,7 +111,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         TextView titleText = (TextView) findViewById(R.id.title);
 
         CategoryFragment categoryFragment = new CategoryFragment();
-        String url = "http://360hay.com/mobile/article/HotNews";
+        String url = AppConfigService.DOMAIN + "/mobile/article/HotNews";
         String title = getResources().getString(R.string.news);
         String catetitle = getResources().getString(R.string.category);
         String name = "tintuc";
@@ -129,7 +142,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     if (!jsonObject.getBoolean("openLink")) {
                         PagerAdapter pagerAdapter = (PagerAdapter) viewPager.getAdapter();
                         final ArticleFragment af = (ArticleFragment) pagerAdapter.getItem(0);
-                        af.setUrl("http://360hay.com/mobile/article/" + jsonObject.getString("cateName"));
+                        af.setUrl(AppConfigService.DOMAIN + "/mobile/article/" + jsonObject.getString("cateName"));
                         af.setTitle(jsonObject.getString("cateLabel"));
                         af.setName(jsonObject.getString("cateName"));
                         viewPager.setCurrentItem(0);
@@ -165,7 +178,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     if (af.getTitle() != null && !af.getTitle().isEmpty()) {
                         tabLayout.getTabAt(0).setText(af.getTitle());
                         TextView title = (TextView) findViewById(R.id.title);
-                        title.setText(af.getTitle());
+                        //title.setText(af.getTitle());
                     }
                 }
             }
@@ -174,6 +187,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onPageScrollStateChanged(int state) {
             }
         });
+        callbackManager = CallbackManager.Factory.create();
+        boolean loggedIn = AccessToken.getCurrentAccessToken() == null;
+        Profile profile = Profile.getCurrentProfile();
+        if(profile != null)
+            profile.getName();
     }
 
     private void createFragment(String url, String title, String name, List<Fragment> fragments) {
@@ -248,6 +266,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         viewPager = null;
         LocalStorageHelper.saveToFile("lasttimeupdate", System.currentTimeMillis() + "");
         ActivityLogService.getInstance().submitLogToServer();
+        if(accessTokenTracker != null)
+        accessTokenTracker.stopTracking();
+        if(profileTracker != null)
+        profileTracker.stopTracking();
         super.onDestroy();
     }
 
@@ -258,7 +280,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             Intent intent = new Intent(getApplicationContext(), NotificationActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_favorite_cates) {
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_cates", new HttpRequestListener() {
+            HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/settings/get?option=favorite_cates", new HttpRequestListener() {
                 @Override
                 public void onRecievedData(Object data, ErrorCode errorCode) {
                     if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
@@ -275,7 +297,31 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }, null);
 
         } else if (id == R.id.nav_settings) {
-                HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=favorite_countries", new HttpRequestListener() {
+            HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/settings/get?option=favorite_countries", new HttpRequestListener() {
+                @Override
+                public void onRecievedData(Object data, ErrorCode errorCode) {
+                    if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
+                        try {
+                            JSONObject settings = new JSONObject(data.toString());
+                            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                            intent.putExtra("settings", settings.toString());
+                            startActivity(intent);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }, null);
+
+        } else if (id == R.id.nav_language) {
+            settingNewsLanguage();
+
+        }
+        return true;
+    }
+
+    private void settingNewsLanguage() {
+        HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/settings/get?option=favorite_languages", new HttpRequestListener() {
             @Override
             public void onRecievedData(Object data, ErrorCode errorCode) {
                 if (errorCode != null && errorCode.getErrorCode().equals(ErrorCode.ERROR_CODE.SUCCESSED)) {
@@ -290,9 +336,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }
         }, null);
-
-    }
-        return true;
     }
 
     private void updateViewPager() {
@@ -388,6 +431,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         // Showing Alert Message
         alertDialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        callbackManager.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.vns.webstore.middleware.entity.Article;
 import com.vns.webstore.middleware.entity.Websiteinfo;
@@ -18,6 +19,7 @@ import com.webstore.webstore.entity.UserActivity;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +63,7 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ArticleViewHolder articleViewHolder, int i) {
+    public void onBindViewHolder(final ArticleViewHolder articleViewHolder, int i) {
 
         if(websiteinfoMap == null || websiteinfoMap.isEmpty())
             try {
@@ -91,7 +93,21 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleViewHolder> {
         }
         articleViewHolder.ownerName.setText(article.getFromWebSite()+ "\n(" + article.getStrDate() + ")");
         //articleViewHolder.getType().setText(article.getType());
-        Picasso.with(context).load(article.getImageUrl()).placeholder(R.drawable.photos_icon).into(articleViewHolder.articleImage);
+        Picasso.with(context).load(article.getImageUrl()).placeholder(R.drawable.loading).into(articleViewHolder.articleImage, new Callback() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onError() {
+                ViewGroup.LayoutParams params = articleViewHolder.articleImage.getLayoutParams();
+                params.height=0;
+                params.width=0;
+                articleViewHolder.articleImage.setLayoutParams(params);
+                articleViewHolder.articleImage.setVisibility(View.INVISIBLE);
+            }
+        });
         articleViewHolder.articleTitle.setText(article.getTitle());
         articleViewHolder.setUrl(article.getUrl());
         articleViewHolder.setArticleHtml(renderArticle(article));

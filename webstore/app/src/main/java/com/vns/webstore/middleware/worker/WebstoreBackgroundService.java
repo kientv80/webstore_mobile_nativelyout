@@ -9,6 +9,7 @@ import com.vns.webstore.middleware.entity.NotifyInfo;
 import com.vns.webstore.middleware.entity.NotifyListener;
 import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.network.HttpClientHelper;
+import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.WebstoreService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.vns.webstore.ui.notification.Notification;
@@ -94,7 +95,7 @@ public class WebstoreBackgroundService extends Service{
                     }catch (Exception ex){
                         ex.printStackTrace();
                     }
-                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/article/update?time="+cachedTime, null, UPDATE);
+                    HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN +"/mobile/article/update?time="+cachedTime, null, UPDATE);
                 }catch (Exception ex){
                     ex.printStackTrace();
                 }
@@ -109,9 +110,9 @@ public class WebstoreBackgroundService extends Service{
                 try {
                     if (notifyInfoList != null && !notifyInfoList.isEmpty()) {
                         if (notifyInfoList.size() > 1) {
-                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle() + ". Và " + (notifyInfoList.size() - 1) + " tin khác.", R.drawable.appicon, Notification.NOTIFY_ID_NEWS_UPDATE);
+                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle() + ". Và " + (notifyInfoList.size() - 1) + " tin khác.", R.drawable.globalnewsicon, Notification.NOTIFY_ID_NEWS_UPDATE);
                         } else {
-                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle(), R.drawable.appicon, Notification.NOTIFY_ID_NEWS_UPDATE);
+                            Notification.notifyNewUpate(getApplicationContext(), "Tin Mới", notifyInfoList.get(0).getTitle(), R.drawable.globalnewsicon, Notification.NOTIFY_ID_NEWS_UPDATE);
                         }
 
                     }

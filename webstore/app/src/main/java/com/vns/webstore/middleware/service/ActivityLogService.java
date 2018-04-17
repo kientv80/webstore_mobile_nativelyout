@@ -68,7 +68,7 @@ public class ActivityLogService {
 
         List<Pair<String,String>> params = new ArrayList<>();
         params.add(new Pair<String, String>("data",data.toString()));
-        HttpClientHelper.executeHttpPostRequest("http://360hay.com/log", new HttpRequestListener() {
+        HttpClientHelper.executeHttpPostRequest(AppConfigService.DOMAIN +"/log", new HttpRequestListener() {
             @Override
             public void onRecievedData(Object data, ErrorCode errorCode) {
                 System.out.print(data);

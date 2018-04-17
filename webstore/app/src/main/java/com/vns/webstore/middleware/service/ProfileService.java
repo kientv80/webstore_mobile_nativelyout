@@ -28,31 +28,47 @@ public class ProfileService {
         if(profileJSon == null || profileJSon.isEmpty()){
             getProfileId(context);//load and next time, we should have it
         }else{
-            JsonElement person =  new JsonParser().parse(profileJSon);
-            p = new Profile(person.getAsJsonObject().get("id").getAsString(),"","","");
+            try {
+                JsonElement person = new JsonParser().parse(profileJSon);
+                p = new Profile(person.getAsJsonObject().get("id").getAsString(), person.getAsJsonObject().get("name").getAsString(), person.getAsJsonObject().get("image").getAsString(), "");
+            }catch (Exception ex){
+                p = getDefaultProfile();
+                ex.printStackTrace();
+            }
         }
         return p;
     }
+    private static Profile getDefaultProfile(){
+        return new Profile("-1", "NA", "NA", "NA");
+    }
     public static Profile getProfile(){
-        if(p != null)
-            return p;
         String profileJSon = LocalStorageHelper.getFromFile("profileinfo");
         if(profileJSon != null && !profileJSon.isEmpty()){
-            JsonElement person =  new JsonParser().parse(profileJSon);
-            p = new Profile(person.getAsJsonObject().get("id").getAsString(),"","","");
+            try {
+                JsonElement person = new JsonParser().parse(profileJSon);
+                return new Profile(person.getAsJsonObject().get("id").getAsString(), "", "", "");
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return getDefaultProfile();
+            }
         }
-        return p;
+        return getDefaultProfile();
     }
     private static void getProfileId(Context context){
         DeviceInfo deviceInfo = DeviceManager.getIniqueIdForThisDevice(context);
         List<Pair<String,String>> params = new ArrayList<>();
         params.add(new Pair<String, String>("deviceid",deviceInfo.getUuid().toString()));
         params.add(new Pair<String, String>("deviceinfo",JSONHelper.toJSON(deviceInfo)));
-        HttpClientHelper.executeHttpPostRequest("http://360hay.com/profile",new HttpRequestListener(){
+        HttpClientHelper.executeHttpPostRequest(AppConfigService.DOMAIN + "/profile",new HttpRequestListener(){
             @Override
             public void onRecievedData(Object data, ErrorCode errorCode) {
                 if(data != null){
-                    LocalStorageHelper.saveToFile("profileinfo", data.toString());
+                    try {
+                        new JsonParser().parse(data.toString());//Check make sure valid json
+                        LocalStorageHelper.saveToFile("profileinfo", data.toString());
+                    }catch (Exception ex){
+                        ex.printStackTrace();
+                    }
                 }
             }
         },params);

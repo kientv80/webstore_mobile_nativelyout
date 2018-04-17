@@ -1,17 +1,19 @@
 <resources>
     <string name="msg.web.loading">Đang tải bài viết ... </string>
-    <string name="app_name">GlobalNews</string>
+    <string name="app_name">GlobalNews Index</string>
     <string name="nav_favorite_cates">Chủ Đề Yêu Thích</string>
     <string name="news">Tin Tức</string>
     <string name="title_notify">Thông Báo Mới</string>
     <string name="navigation_drawer_open">Mở</string>
     <string name="navigation_drawer_close">Đóng</string>
     <string name="title_activity_web_view">WebViewActivity</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Cấu Hình</string>
 
     <string name="title_activity_open_article">OpenArticleActivity</string>
 
-    <string name="nav_setting">Cấu Hình</string>
+    <string name="nav_setting">Tin Tức Từ</string>
+    <string name="nav_language">Ngôn Ngữ Tin</string>
+
     <string name="nav_notification">Thông Báo Mới</string>
     <string name="translate">Dịch</string>
     <string name="cancel">Đóng</string>
@@ -21,5 +23,8 @@
     <string name="error_access_service">Không thể truy cập dịch vu, vui lòng kiểm tra kết nối và thứ lại sau.</string>
     <string name="error_noconnection">Không có kết nối, vui lòng kiểm tra Wifi,3G.</string>
     <string name="category">Danh Mục</string>
+    <string name="facebook_app_id">1658222504229501</string>
+    <string name="fb_login_protocol_scheme">fb1658222504229501</string>
+    <string name="nav_profile_name">Login</string>
 
 </resources>

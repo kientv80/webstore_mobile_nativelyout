@@ -1,10 +1,6 @@
 package com.vns.webstore.middleware.service;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.vns.webstore.middleware.entity.Websiteinfo;
-import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
@@ -23,33 +19,42 @@ import java.util.Map;
  */
 public class AppConfigService {
     public static final String CLIENT_VERSION="1.0";
-    private static List<String> goodImageWebsites = new ArrayList<>();
+    public static final String DOMAIN="http://globalnewsindex.com";
+
+    private static List<String> badImageWebsites = new ArrayList<>();
     public static boolean isGoodImageWebsite(String name){
-        return goodImageWebsites.contains(name);
+        return !badImageWebsites.contains(name);
     }
     public static void checkVersion(HttpRequestListener listener){
-        HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/appversion",listener,null);
+        HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/appversion",listener,null);
     }
     public static Map<String,Websiteinfo> getWebsiteinfo() throws JSONException {
         Map<String,Websiteinfo> websiteinfoMap = new HashMap<>();
+
         String webinfo = LocalStorageHelper.getFromFile("webinfo");
         List<Websiteinfo> websiteinfoList = null;
         if(webinfo != null && !webinfo.isEmpty()){
             JSONObject jsonObject = new JSONObject(webinfo);
             if((System.currentTimeMillis() - jsonObject.getLong("cachedTime"))> 24*60*60*1000){
-                HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/websiteinfo",null,"webinfo");
+                HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN +"/mobile/websiteinfo",null,"webinfo");
             }else{
-                websiteinfoList = JSONHelper.toObjects(new JSONObject(jsonObject.getString("data")).getString("webinfo"), Websiteinfo.class);
-            }
+                try {
+                    websiteinfoList = JSONHelper.toObjects(new JSONObject(jsonObject.getString("data")).getString("webinfo"), Websiteinfo.class);
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                    LocalStorageHelper.saveToFile("webinfo","");
+                    HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN +"/mobile/websiteinfo",null,"webinfo");
+                }
+                }
         }else{
-            HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/websiteinfo",null,"webinfo");
+            HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN +"/mobile/websiteinfo",null,"webinfo");
         }
         if(websiteinfoList != null && !websiteinfoList.isEmpty()){
-            goodImageWebsites.clear();
+            badImageWebsites.clear();
             for(Websiteinfo wi : websiteinfoList){
                 websiteinfoMap.put(wi.getName(),wi);
-                if(wi.getIsGoodImage()){
-                    goodImageWebsites.add(wi.getName());
+                if(!wi.getIsGoodImage()){
+                    badImageWebsites.add(wi.getName());
                 }
             }
         }

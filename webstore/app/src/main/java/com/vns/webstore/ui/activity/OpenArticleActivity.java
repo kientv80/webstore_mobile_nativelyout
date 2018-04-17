@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -15,10 +16,16 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.widget.ShareButton;
+import com.facebook.share.widget.ShareDialog;
 import com.vns.webstore.middleware.network.ConnectionManager;
 import com.vns.webstore.middleware.service.SettingsService;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
@@ -47,7 +54,13 @@ public class OpenArticleActivity extends BaseActivity {
                 finish();
             }
         });
-
+        ShareLinkContent content = new ShareLinkContent.Builder()
+                .setContentUrl(Uri.parse(currentUrl))
+                .build();
+        //ShareDialog shareDialog = new ShareDialog(this);
+        //shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+        ShareButton shareButton = (ShareButton)findViewById(R.id.btn_fbshare);
+        shareButton.setShareContent(content);
 
         if(!"https://translate.google.com/m/translate".equals(currentUrl)) {
             enableFloatingActionButton(new View.OnClickListener() {
@@ -86,8 +99,10 @@ public class OpenArticleActivity extends BaseActivity {
             wvDetail.setWebViewClient(new WebViewClient() {
                 @Override
                 public boolean shouldOverrideUrlLoading(final WebView view, final String url) {
+
                     if(ConnectionManager.isNetworkAvailable()){
-                        view.loadUrl(url);
+                        if(url.startsWith("http"))
+                            view.loadUrl(url);
                     }else{
                         view.loadDataWithBaseURL("file:///android_asset/style.css", Resources.getSystem().getString(R.string.error_noconnection), MYTYPE, UTF_8, "");;
                     }
@@ -103,6 +118,7 @@ public class OpenArticleActivity extends BaseActivity {
                         timerDelayToLoadPage(10000);
                     }
                 }
+
 
             });
             //Show the detail page after usr touch the wvDetailTmp 3 seconds

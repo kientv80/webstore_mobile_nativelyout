@@ -3,6 +3,7 @@ package com.vns.webstore.middleware.network;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 
+import com.google.gson.JsonParser;
 import com.vns.webstore.middleware.storage.LocalStorageHelper;
 import com.webstore.webstore.R;
 
@@ -44,16 +45,17 @@ public class HttpGetRequest extends AsyncTask {
                     result.append(line);
                 }
                 if(cachedName != null && result != null && !result.toString().isEmpty()){
-                    JSONObject data = new JSONObject();
-                    data.put("cachedTime",System.currentTimeMillis());
-                    data.put("data",result.toString());
-                    LocalStorageHelper.saveToFile(cachedName, data.toString());
+                    if(isJSON(result.toString())) {
+                        JSONObject data = new JSONObject();
+                        data.put("cachedTime", System.currentTimeMillis());
+                        data.put("data", result.toString());
+                        LocalStorageHelper.saveToFile(cachedName, data.toString());
+                    }
                 }
                 errorCode = new ErrorCode(ErrorCode.ERROR_CODE.SUCCESSED, "");
             }catch (Exception ex){
                 System.out.println("ERROR to access " + urlString);
                 ex.printStackTrace();
-
                 errorCode = new ErrorCode(ErrorCode.ERROR_CODE.CONNECTION_TIMEOUT, HttpClientHelper.context.getResources().getString(R.string.error_access_service));
             }finally {
                 if(httpURLConnection != null)
@@ -67,5 +69,14 @@ public class HttpGetRequest extends AsyncTask {
             callback.onRecievedData(result, errorCode);
         }
         return result;
+    }
+    private boolean isJSON(String data){
+        try {
+            new JsonParser().parse(data);
+            return true;
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+        return false;
     }
 }

@@ -42,7 +42,7 @@ public class SettingsService implements HttpRequestListener{
         loadSettings();
     }
     public void loadSettings(){
-        HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/settings/get?option=settings",this,"settings");
+        HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/settings/get?option=settings",this,"settings");
     }
 
     @Override

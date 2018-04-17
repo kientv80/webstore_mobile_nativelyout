@@ -18,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.vns.webstore.middleware.network.ConnectionManager;
+import com.vns.webstore.middleware.service.AppConfigService;
 import com.vns.webstore.middleware.service.ProfileService;
 import com.webstore.webstore.R;
 
@@ -48,7 +49,7 @@ public class WebviewBaseFragment extends Fragment {
                 @Override
                 public boolean shouldOverrideUrlLoading(WebView view, String url) {
                     if(ConnectionManager.isNetworkAvailable()){
-                        if(url.startsWith("http://360hay.com")){
+                        if(url.startsWith(AppConfigService.DOMAIN)){
                             if(url.contains("?")){
                                 view.loadUrl(url + "&uid=" + ProfileService.getProfile().getId());
                             }else{

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.vns.webstore.middleware.network.ErrorCode;
 import com.vns.webstore.middleware.network.HttpClientHelper;
 import com.vns.webstore.middleware.network.HttpRequestListener;
+import com.vns.webstore.middleware.service.AppConfigService;
 import com.webstore.webstore.R;
 
 import org.json.JSONException;
@@ -53,7 +54,7 @@ public class TranslateDialog extends DialogFragment{
                             resultText.setText("");
                         }
                     });
-                    HttpClientHelper.executeHttpGetRequest("http://360hay.com/mobile/translate?word=" + word, new HttpRequestListener() {
+                    HttpClientHelper.executeHttpGetRequest(AppConfigService.DOMAIN + "/mobile/translate?word=" + word, new HttpRequestListener() {
                         @Override
                         public void onRecievedData(Object data, ErrorCode errorCode) {
                             try {
