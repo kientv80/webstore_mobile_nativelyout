@@ -121,6 +121,7 @@ public class SettingsActivity extends AppCompatActivity {
                     }else{
                         try {
                             saveFBProfile(null);
+                            saveSettings();
                             if(fbLoginDialog != null)
                                 fbLoginDialog.dismiss();
                             finish();
@@ -149,7 +150,10 @@ public class SettingsActivity extends AppCompatActivity {
                         Profile oldProfile,
                         Profile currentProfile) {
                     try {
-                        saveFBProfile(currentProfile);
+                        if(currentProfile != null) {
+                            saveFBProfile(currentProfile);
+                            saveSettings();
+                        }
                         if(fbLoginDialog != null)
                             fbLoginDialog.dismiss();
                         finish();
@@ -201,14 +205,16 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
         super.onActivityResult(requestCode, resultCode, data);
+
     }
     @Override
     public void onBackPressed() {
+        /*
         try {
             saveSettings();
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
         super.onBackPressed();
     }
 
